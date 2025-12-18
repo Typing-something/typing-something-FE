@@ -13,13 +13,13 @@ type Props = {
     songId: number;
     title: string;
     artist: string;
-    lyrice: string;
+    lyrics: string;
   };
 };
 
 export function SongTypeBoard({ song }: Props) {
   const [input, setInput] = useState("");
-  const text = song?.lyrice ?? "가사가 없습니다(디버깅용)";
+  const text = song?.lyrics ?? "가사가 없습니다(디버깅용)";
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const focusInput = () => inputRef.current?.focus();
