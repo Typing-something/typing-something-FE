@@ -4,11 +4,12 @@ export type Song = {
   songId: number;
   title: string;
   artist: string;
-  lyrice: string;
+  lyrics: string;
 }
 async function getSong(id: number): Promise<Song>{
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
   const res = await fetch(
-    `https://a19711ac-539e-40c0-a306-e3b41b1fdd35.mock.pstmn.io/songs/${id}`,
+    `${API_BASE_URL}/api/songs/${id}`,
     {
       // 개발 중엔 매번 새로 가져오고 싶으면:
       cache: "no-store",
