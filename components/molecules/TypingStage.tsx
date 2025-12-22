@@ -11,6 +11,8 @@ type Props = {
   onFocusRequest: () => void;
   inputRef: RefObject<HTMLInputElement | null>;
   onChangeInput: (v: string) => void;
+  isComposing: boolean;
+  onComposingChange: (v: boolean) => void;
 };
 
 export function TypingStage({
@@ -20,8 +22,10 @@ export function TypingStage({
   onFocusRequest,
   inputRef,
   onChangeInput,
+  isComposing,
+  onComposingChange,
 }: Props) {
-  const [isComposing, setIsComposing] = useState(false);
+  // const [isComposing, setIsComposing] = useState(false);
 
   return (
     <div className="relative px-6 py-8 space-y-4 cursor-text" onClick={onFocusRequest}>
@@ -35,8 +39,8 @@ export function TypingStage({
           ref={inputRef}
           value={input}
           onChange={(v) => onChangeInput(normalizeInput(text, v, 5))}
-          onCompositionStart={() => setIsComposing(true)}
-          onCompositionEnd={() => setIsComposing(false)}
+          onCompositionStart={() => onComposingChange(true)}
+          onCompositionEnd={() => onComposingChange(false)}
         />
     </div>
   );

@@ -2,24 +2,28 @@
 
 import type { Song } from "@/app/page";
 import { TypingDisplay } from "../molecules/TypingDisplay";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { TypingInput } from "../atoms/TypingInput";
 import { TypingBottomBar } from "../molecules/TypingBottomBar";
 import { TypingStage } from "../molecules/TypingStage";
 import { TypingTopBar } from "../molecules/TypingTopBar";
-
+import { useLiveTypingMetrics } from "@/hooks/useLiveTypingMetrics";
+import { ResultModal } from "../molecules/ResultModal";
 type Props = {
   song: {
     songId: number;
     title: string;
     artist: string;
-    lyrics: string;
+    lyrice: string;
   };
 };
 
+type Result = { wpm: number; cpm: number; acc: number };
+
 export function SongTypeBoard({ song }: Props) {
   const [input, setInput] = useState("");
-  const text = song?.lyrics ?? "가사가 없습니다(디버깅용)";
+  const [isComposing, setIsComposing] = useState(false);
+  const text = song?.lyrice ?? "가사가 없습니다(디버깅용)";
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const focusInput = () => inputRef.current?.focus();
@@ -27,11 +31,32 @@ export function SongTypeBoard({ song }: Props) {
   const progress = Math.min(Math.round((input.length / text.length) * 100), 100);
   const cursorIndex = Math.min(input.length, text.length);
 
-  // ✅ UI만 먼저: 더미 값
-  const wpm = 72;
-  const cpm = 360;
-  const acc = 98;
+  const {metrics, resetMetrics} = useLiveTypingMetrics(text, input, isComposing);
 
+  const wpm = metrics.wpm;
+  const cpm = metrics.cpm;
+  const acc = metrics.acc;
+
+  const [isResultOpen, setIsResultOpen] = useState(false);
+  const [result, setResult] = useState<Result | null>(null);
+  const isFinished = input.length >= text.length; // normalize 정책이면 필요시 더 엄격히
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      if (isComposing) return;
+      if (!isFinished) return;
+  
+      e.preventDefault();
+  
+      setResult({ wpm: metrics.wpm, cpm: metrics.cpm, acc: metrics.acc });
+      setIsResultOpen(true);
+    };
+  
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isComposing, isFinished, metrics.wpm, metrics.cpm, metrics.acc]);
+ 
   return (
     <div className="w-full max-w-4xl rounded-xl border border-neutral-300 bg-white shadow-lg">
       {/* =======================
@@ -55,11 +80,21 @@ export function SongTypeBoard({ song }: Props) {
           onFocusRequest={focusInput}
           inputRef={inputRef}
           onChangeInput={setInput}
+          isComposing={isComposing}
+          onComposingChange={setIsComposing}
         />     
          {/* =======================
           하단: 메타정보(이미지) + 버튼들
          ======================= */}
         <TypingBottomBar />
+         {/* =======================
+          하단: 메타정보(이미지) + 버튼들
+         ======================= */}
+        <ResultModal
+          open={isResultOpen}
+          result={result}
+          onClose={() => setIsResultOpen(false)}
+        />
     </div>
   );
 }
