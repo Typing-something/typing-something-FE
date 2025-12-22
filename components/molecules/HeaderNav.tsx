@@ -4,16 +4,15 @@ import { NavLink } from "../atoms/NavLink";
 
 export function HeaderNav() {
   return (
-    <nav className="flex w-full items-center justify-between gap-6">
+    <nav 
+      className="flex w-full items-center justify-between gap-6"
+      style={{ fontFamily: "var(--font-orbit)" }}
+    >
       <Logo />
 
       <div className="flex items-center gap-4 text-sm">
-        <NavLink href="/">Playground</NavLink>
-        <NavLink href="/snippets">Snippets</NavLink>
-        <NavLink href="/about">About</NavLink>
-        <NavLink href="https://github.com/..." external>
-          GitHub
-        </NavLink>
+        <NavLink href="/leaderboard">Leaderboard</NavLink>
+        <NavLink href="/mypage">MyPage</NavLink>
       </div>
     </nav>
   );

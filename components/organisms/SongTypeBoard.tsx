@@ -1,9 +1,6 @@
 "use client";
 
-import type { Song } from "@/app/page";
-import { TypingDisplay } from "../molecules/TypingDisplay";
 import { useState, useRef, useEffect } from "react";
-import { TypingInput } from "../atoms/TypingInput";
 import { TypingBottomBar } from "../molecules/TypingBottomBar";
 import { TypingStage } from "../molecules/TypingStage";
 import { TypingTopBar } from "../molecules/TypingTopBar";
@@ -88,7 +85,7 @@ export function SongTypeBoard({ song }: Props) {
          ======================= */}
         <TypingBottomBar />
          {/* =======================
-          하단: 메타정보(이미지) + 버튼들
+           결과 모달
          ======================= */}
         <ResultModal
           open={isResultOpen}

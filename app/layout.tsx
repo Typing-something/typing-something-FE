@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppHeader } from "@/components/organisms/AppHeader";
 import { AppFooter } from "@/components/organisms/AppFooter";
+import { orbit, inter, orbitron, grandiflora } from "./font";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,8 +28,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        className="bg-neutral-100 text-neutral-900"
+        className={`
+          ${orbit.variable}
+          ${inter.variable}
+          ${orbitron.variable}
+          ${grandiflora.variable}
+          bg-neutral-100
+          text-neutral-900
+            antialiased
+        `}
       >
         <AppHeader />
         <main className="min-h-screen flex items-center justify-center">
