@@ -123,7 +123,7 @@ export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingD
     composingInputIndex >= 0 ? parsed.inputToExtra[composingInputIndex] : null;
 
   return (
-    <div className="flex flex-wrap gap-[2px] text-lg leading-7">
+    <div className="flex flex-wrap gap-[2px] text-[20px] leading-[30px]">
       {safeText.split("").map((char, index) => {
         const state = parsed.states[index];
         const typed = parsed.typedAt[index];
@@ -135,7 +135,7 @@ export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingD
 
         let color = "text-neutral-400";
         if (state === "correct") color = "text-neutral-900";
-        if (state === "wrong") color = "text-red-500";
+        if (state === "wrong") color = "text-[#fb4058]";
 
         // 조합 중인 “진짜 그 칸”이면 빨강 금지
         if (isComposing && index === composingTextIndex) {
@@ -145,7 +145,7 @@ export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingD
         return (
           <span key={index}>
             {isCursorHere && (
-              <span className="inline-block w-[2px] h-[1.3em] bg-blue-500 align-middle animate-pulse mr-[1px]" />
+              <span className="inline-block w-[2px] h-[1.45em] bg-[#fb4058] align-middle typing-cursor mr-[1px]" />
             )}
 
             {/* space 자리의 extra를 글자 단위로 렌더(조합중 1글자만 검정) */}
@@ -160,7 +160,7 @@ export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingD
                   return (
                     <span
                       key={ei}
-                      className={isComposingExtraHere ? "text-neutral-900" : "text-red-500"}
+                      className={isComposingExtraHere ? "text-neutral-900" : "text-[#fb4058]"}
                     >
                       {c}
                     </span>
@@ -175,7 +175,7 @@ export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingD
       })}
 
       {effectiveCursor === safeText.length && (
-        <span className="inline-block w-[2px] h-[1.3em] bg-blue-500 align-middle animate-pulse ml-[1px]" />
+        <span className="inline-block w-[2px] h-[1.45em] bg-[#fb4058] align-middle typing-cursor ml-[1px]" />
       )}
     </div>
   );
