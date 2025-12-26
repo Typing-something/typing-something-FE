@@ -6,6 +6,7 @@ import { TypingStage } from "../molecules/TypingStage";
 import { TypingTopBar } from "../molecules/TypingTopBar";
 import { useLiveTypingMetrics } from "@/hooks/useLiveTypingMetrics";
 import { ResultModal } from "../molecules/ResultModal";
+import TypingControlBar from "../molecules/TypingControlBar";
 type Props = {
   song: {
     songId: number;
@@ -55,35 +56,48 @@ export function SongTypeBoard({ song }: Props) {
   }, [isComposing, isFinished, metrics.wpm, metrics.cpm, metrics.acc]);
  
   return (
-    <div className="w-full max-w-4xl rounded-xl border border-neutral-300 bg-white shadow-lg">
+    <div className="w-full max-w-4xl ">
       {/* =======================
           상단: 타이틀 + Stats + Progress
          ======================= */}
-      <TypingTopBar 
-        title={song.title}
-        artist={song.artist}
-        wpm={wpm}
-        cpm={cpm}
-        acc={acc}
-        progress={progress}
-      />
-      {/* =======================
-          중앙: 타이핑 영역
-         ======================= */}
-        <TypingStage
-          text={text}
-          input={input}
-          cursorIndex={cursorIndex}
-          onFocusRequest={focusInput}
-          inputRef={inputRef}
-          onChangeInput={setInput}
-          isComposing={isComposing}
-          onComposingChange={setIsComposing}
-        />     
+      <div className="mb-16">
+        <TypingTopBar wpm={wpm} cpm={cpm} acc={acc}/>
+      </div>
+       <div className="space-y-6">
+        <div className="space-y-6">
+           {/* =======================
+                중앙: 타이핑 영역
+            ======================= */}
+            <TypingStage
+              text={text}
+              input={input}
+              cursorIndex={cursorIndex}
+              onFocusRequest={focusInput}
+              inputRef={inputRef}
+              onChangeInput={setInput}
+              isComposing={isComposing}
+              onComposingChange={setIsComposing}
+            />     
+            {/* =======================
+              중앙 : 컨트롤 바
+            ======================= */}
+            <TypingControlBar />
+        </div>
          {/* =======================
           하단: 메타정보(이미지) + 버튼들
          ======================= */}
-        <TypingBottomBar />
+         <div className="pt-6">
+          <TypingBottomBar 
+              title={song.title}
+              artist={song.artist}
+              wpm={wpm}
+              cpm={cpm}
+              acc={acc}
+              progress={progress}
+            />
+         </div>
+       </div>
+        
          {/* =======================
            결과 모달
          ======================= */}
@@ -92,6 +106,6 @@ export function SongTypeBoard({ song }: Props) {
           result={result}
           onClose={() => setIsResultOpen(false)}
         />
-    </div>
+        </div>
   );
 }
