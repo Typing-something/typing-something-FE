@@ -7,6 +7,8 @@ import { TypingTopBar } from "../molecules/TypingTopBar";
 import { useLiveTypingMetrics } from "@/hooks/useLiveTypingMetrics";
 import { ResultModal } from "../molecules/ResultModal";
 import TypingControlBar from "../molecules/TypingControlBar";
+import { SettingsSidebar } from "./SettingsSidebar";
+import { LyricsListSidebar } from "./LyricsListSidebar";
 type Props = {
   song: {
     songId: number;
@@ -21,6 +23,8 @@ type Result = { wpm: number; cpm: number; acc: number };
 export function SongTypeBoard({ song }: Props) {
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLyricsListOpen, setIsLyricsListOpen] = useState(false);
   const text = song?.lyrice ?? "가사가 없습니다(디버깅용)";
 
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -61,7 +65,13 @@ export function SongTypeBoard({ song }: Props) {
           상단: 타이틀 + Stats + Progress
          ======================= */}
       <div className="mb-16">
-        <TypingTopBar wpm={wpm} cpm={cpm} acc={acc}/>
+        <TypingTopBar 
+          wpm={wpm} 
+          cpm={cpm} 
+          acc={acc}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenLyricsList={() => setIsLyricsListOpen(true)}
+        />
       </div>
        <div className="space-y-6">
         <div className="space-y-6">
@@ -106,6 +116,20 @@ export function SongTypeBoard({ song }: Props) {
           result={result}
           onClose={() => setIsResultOpen(false)}
         />
+         {/* =======================
+           사이드 세팅 바
+         ======================= */}
+         <SettingsSidebar 
+          open={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+         />
+         {/* =======================
+           사이드 리스트 바
+         ======================= */}
+         <LyricsListSidebar 
+          open={isLyricsListOpen}
+          onClose={() => setIsLyricsListOpen(false)}
+         />
         </div>
   );
 }

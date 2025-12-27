@@ -11,7 +11,7 @@ export function IconButton({children, ariaLabel, onClick, variant = "default"}: 
     return (
         <button 
             type="button"
-            aria-label="ariaLabel"
+            aria-label={ariaLabel}
             onClick={onClick}
             className={`h-7 w-7 grid place-items-center text-neutral-800 hover:bg-neutral-50 ${variantStyle}`} 
             >
