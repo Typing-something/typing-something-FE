@@ -34,3 +34,44 @@ body {
   animation: cursor-blink 1s step-end infinite;
 }
 
+/* ===============================
+   Manuscript (원고지) Styles
+   =============================== */
+/* 원고지: 글자 자체를 칸으로 보이게 */
+.manuscript-cell-inline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 칸 크기: 폰트에 반응하도록 em 기반 */
+  height: 1.6em;
+  min-width: 1.2em;
+
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: transparent;
+}
+
+/* 글자 정렬 */
+.manuscript-char {
+  line-height: 1;
+  transform: translateY(1px); /* 글자 살짝 아래(취향) */
+}
+
+/* 현재 커서 칸 표시 (칸 안에 얇은 빨간 커서) */
+.manuscript-caret {
+  position: absolute;
+  left: 10%;
+  top: 15%;
+  width: 2px;
+  height: 70%;
+  background: rgba(251, 64, 88, 0.9);
+  border-radius: 1px;
+  animation: manuscript-blink 1s step-end infinite;
+}
+
+@keyframes manuscript-blink {
+  50% {
+    opacity: 0;
+  }
+}

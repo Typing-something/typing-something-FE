@@ -1,5 +1,7 @@
 "use client";
 
+import { useTypingSettings } from "@/stores/useTypingSetting";
+
 type TypingDisplayProps = {
   text: string;
   input: string;
@@ -16,9 +18,8 @@ type Parsed = {
   extrasBeforeSpace: Record<number, string>;
   cursorIndex: number;
 
-  // 핵심: input index가 실제로 어디에 렌더됐는지 매핑
-  inputToText: number[]; // inputIndex -> textIndex (없으면 -1)
-  inputToExtra: (ExtraPos | null)[]; // inputIndex -> extra 위치
+  inputToText: number[];
+  inputToExtra: (ExtraPos | null)[];
 };
 
 function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
@@ -30,8 +31,8 @@ function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
   const inputToText: number[] = Array(input.length).fill(-1);
   const inputToExtra: (ExtraPos | null)[] = Array(input.length).fill(null);
 
-  let i = 0; // text index
-  let j = 0; // input index
+  let i = 0;
+  let j = 0;
 
   const findNextSpace = (from: number) => {
     const idx = text.indexOf(" ", from);
@@ -42,7 +43,6 @@ function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
     const t = text[i];
     const u = input[j];
 
-    // text가 space인 자리
     if (t === " ") {
       if (u === " ") {
         states[i] = "correct";
@@ -57,16 +57,14 @@ function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
           inputToText[j] = -1;
           inputToExtra[j] = { spaceIndex: i, offset: prev.length };
         } else {
-          // normalizeInput에서 막히는 게 정석. 혹시 들어오면 그냥 소비
           inputToText[j] = -1;
           inputToExtra[j] = null;
         }
-        j++; // text는 space에 그대로
+        j++;
       }
       continue;
     }
 
-    // text가 일반 글자, user가 space (규칙3)
     if (u === " ") {
       const nextSpace = findNextSpace(i);
 
@@ -76,7 +74,7 @@ function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
 
       if (nextSpace < n && text[nextSpace] === " ") {
         states[nextSpace] = "correct";
-        inputToText[j] = nextSpace; // 이 space는 nextSpace에 매핑
+        inputToText[j] = nextSpace;
         inputToExtra[j] = null;
 
         i = nextSpace + 1;
@@ -90,7 +88,6 @@ function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
       continue;
     }
 
-    // 일반 매칭
     typedAt[i] = u;
     states[i] = u === t ? "correct" : "wrong";
     inputToText[j] = i;
@@ -110,12 +107,27 @@ function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
   };
 }
 
-export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingDisplayProps) {
-  const safeText = text ?? "";
+export function TypingDisplay({
+  text,
+  input,
+  cursorIndex,
+  isComposing,
+}: TypingDisplayProps) {
+  const uiMode = useTypingSettings((s) => s.uiMode);
+  const isManuscript = uiMode === "manuscript";
+  
+  const fontSize = useTypingSettings((s) => s.fontSize);
+  const fontSizeClass =
+  fontSize === "sm"
+    ? "text-[16px] leading-[26px]"
+    : fontSize === "lg"
+    ? "text-[24px] leading-[36px]"
+    : "text-[20px] leading-[30px]"; // md (default)
+  
+    const safeText = text ?? "";
   const parsed = parseTyping(safeText, input, 5);
   const effectiveCursor = parsed.cursorIndex;
 
-  // 조합 중인 "마지막 input 글자"가 어디에 그려지는지
   const composingInputIndex = isComposing ? input.length - 1 : -1;
   const composingTextIndex =
     composingInputIndex >= 0 ? parsed.inputToText[composingInputIndex] : -2;
@@ -123,7 +135,13 @@ export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingD
     composingInputIndex >= 0 ? parsed.inputToExtra[composingInputIndex] : null;
 
   return (
-    <div className="flex flex-wrap gap-[2px] text-[20px] leading-[30px]">
+    <div
+      className={[
+        "flex flex-wrap",
+        fontSizeClass,
+        isManuscript ? "" : "gap-[2px]", // ✅ 원고지 모드에서는 gap 제거(칸이 간격 역할)
+      ].join(" ")}
+    >
       {safeText.split("").map((char, index) => {
         const state = parsed.states[index];
         const typed = parsed.typedAt[index];
@@ -137,18 +155,21 @@ export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingD
         if (state === "correct") color = "text-neutral-900";
         if (state === "wrong") color = "text-[#fb4058]";
 
-        // 조합 중인 “진짜 그 칸”이면 빨강 금지
         if (isComposing && index === composingTextIndex) {
           color = "text-neutral-900";
         }
 
+        // ✅ "셀" 클래스(원고지 모드일 때만)
+        const cellClass = isManuscript ? "manuscript-cell-inline" : "";
+
         return (
-          <span key={index}>
-            {isCursorHere && (
+          <span key={index} className={isManuscript ? cellClass : ""}>
+            {/* ✅ 원고지 모드에선 커서(막대) 안 그리기: 칸 테두리로 충분함 */}
+            {!isManuscript && isCursorHere && (
               <span className="inline-block w-[2px] h-[1.45em] bg-[#fb4058] align-middle typing-cursor mr-[1px]" />
             )}
 
-            {/* space 자리의 extra를 글자 단위로 렌더(조합중 1글자만 검정) */}
+            {/* space 자리 extra 렌더(원래 로직 유지) */}
             {char === " " && extra && (
               <span>
                 {extra.split("").map((c, ei) => {
@@ -169,12 +190,18 @@ export function TypingDisplay({ text, input, cursorIndex, isComposing }: TypingD
               </span>
             )}
 
-            <span className={color}>{char === " " ? "\u00A0" : displayChar}</span>
+            {/* ✅ 글자 자체: 원고지 모드면 칸 안 가운데 정렬 */}
+            <span className={[color, isManuscript ? "manuscript-char" : ""].join(" ")}>
+              {char === " " ? "\u00A0" : displayChar}
+            </span>
+
+            {/* ✅ 원고지 모드 커서: 현재 칸을 강조 */}
+            {isManuscript && isCursorHere && <span className="manuscript-caret" />}
           </span>
         );
       })}
 
-      {effectiveCursor === safeText.length && (
+      {!isManuscript && effectiveCursor === safeText.length && (
         <span className="inline-block w-[2px] h-[1.45em] bg-[#fb4058] align-middle typing-cursor ml-[1px]" />
       )}
     </div>

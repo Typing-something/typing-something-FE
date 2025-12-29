@@ -3,7 +3,6 @@
 import { RefObject } from "react";
 import { TypingDisplay } from "./TypingDisplay";
 import { TypingInput } from "../atoms/TypingInput";
-import { useState } from "react";
 type Props = {
   text: string;
   input: string;
@@ -29,11 +28,11 @@ export function TypingStage({
 
   return (
     <div className="relative px-6 py-8 space-y-4 cursor-text" onClick={onFocusRequest}>
-      <TypingDisplay 
-        text={text}
-        input={input}
-        cursorIndex={cursorIndex} 
-        isComposing={isComposing}
+        <TypingDisplay
+          text={text}
+          input={input}
+          cursorIndex={cursorIndex}
+          isComposing={isComposing}
         />
         <TypingInput
           ref={inputRef}
