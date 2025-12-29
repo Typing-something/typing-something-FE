@@ -1,13 +1,21 @@
 "use client";
 
+import { useState } from "react";
+import { type UIMode, UIModePicker } from "../molecules/settingssidebar/UIModePicker";
 import { SidebarShell } from "./SidebarShell";
+import { useTypingSettings } from "@/stores/useTypingSetting";
+import { FontSizeSelector } from "../molecules/settingssidebar/FontSizeSelector";
 type Props = {
   open: boolean;
   onClose: () => void;
 };
 
 export function SettingsSidebar({ open, onClose }: Props) {
-  return (
+    const uiMode = useTypingSettings((s) => s.uiMode);
+    const setUIMode = useTypingSettings((s) => s.setUIMode);
+    const fontSize = useTypingSettings((s) => s.fontSize);
+    const setFontSize = useTypingSettings((s) => s.setFontSize); 
+    return (
     <SidebarShell
       open={open}
       onClose={onClose}
@@ -37,53 +45,10 @@ export function SettingsSidebar({ open, onClose }: Props) {
         </section>
 
         {/* FONT SIZE */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold tracking-wider text-neutral-500">
-              FONT SIZE
-            </h3>
-            <span className="text-sm text-neutral-700">md</span>
-          </div>
-
-          <div className="grid grid-cols-3 border border-neutral-300">
-            <button className="py-3 text-sm border-r border-neutral-300">sm</button>
-            <button className="py-3 text-sm bg-black text-white border-r border-neutral-300">
-              md
-            </button>
-            <button className="py-3 text-sm">lg</button>
-          </div>
-        </section>
+        <FontSizeSelector value={fontSize} onChange={setFontSize}/>
 
         {/* UI MODE */}
-        <section className="space-y-3">
-          <h3 className="text-xs font-semibold tracking-wider text-neutral-500">
-            UI MODE
-          </h3>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-3">
-              <input type="radio" checked readOnly className="accent-black" />
-              <span className="text-sm">기본</span>
-            </label>
-
-            <label className="flex items-center gap-3">
-              <input type="radio" readOnly className="accent-black" />
-              <span className="text-sm">Music Player</span>
-            </label>
-
-            <label className="flex items-center gap-3">
-              <input type="radio" readOnly className="accent-black" />
-              <span className="text-sm text-neutral-400">
-                Manuscript (원고지)
-              </span>
-            </label>
-
-            <label className="flex items-center gap-3">
-              <input type="radio" readOnly className="accent-black" />
-              <span className="text-sm text-neutral-400">Arcade</span>
-            </label>
-          </div>
-        </section>
+        <UIModePicker value={uiMode} onChange={setUIMode}/>
       </div>
     </SidebarShell>
   );
