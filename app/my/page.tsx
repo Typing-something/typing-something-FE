@@ -1,6 +1,10 @@
 // app/my/page.tsx
 import React from "react";
-
+import { authOptions } from "../api/auth/[...nextauth]/authOption";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { signOut } from "next-auth/react";
+import { LogoutButton } from "@/components/atoms/LogoutButton";
 type Session = {
   id: string;
   songTitle: string;
@@ -153,7 +157,11 @@ function AchievementCard({ a }: { a: Achievement }) {
   );
 }
 
-export default function MyPage() {
+export default async function MyPage() {
+  const session = await getServerSession(authOptions);
+  if(!session) {
+    redirect("/login?callbackUrl=/mypage");
+  }
   return (
     <main className="min-h-screen bg-neutral-100">
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -182,9 +190,12 @@ export default function MyPage() {
               <button className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800">
                 프로필 편집
               </button>
-              <button className="rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50">
-                설정
-              </button>
+            <LogoutButton
+              callbackUrl="/"
+              className="rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50"
+            >
+              로그아웃
+              </LogoutButton>
             </div>
           </div>
         </section>

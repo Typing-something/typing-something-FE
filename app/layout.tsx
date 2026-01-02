@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppHeader } from "@/components/organisms/AppHeader";
 import { AppFooter } from "@/components/organisms/AppFooter";
 import { orbit, inter, orbitron, grandiflora } from "./font";
+import Providers from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,11 +39,14 @@ export default function RootLayout({
             antialiased
         `}
       >
+       <Providers>
         <AppHeader />
-        <main className="min-h-screen flex items-center justify-center">
-          {children}
-        </main>
-        {/* <AppFooter /> */}
+          {/* <main className="min-h-screen flex items-center justify-center"> */}
+          <main className="min-h-screen">
+            {children}
+          </main>
+          {/* <AppFooter /> */}
+       </Providers>
       </body>
     </html>
   );
