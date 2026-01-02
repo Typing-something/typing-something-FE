@@ -13,7 +13,7 @@ export function HeaderNav() {
       <div className="flex items-center gap-4 text-sm">
         <NavLink href="/leaderboard">Leaderboard</NavLink>
         <NavLink href="/my">MyPage</NavLink>
-      </div>
+      </div> 
     </nav>
   );
 }
