@@ -3,8 +3,8 @@ import React from "react";
 import { authOptions } from "../api/auth/[...nextauth]/authOption";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { signOut } from "next-auth/react";
-import { LogoutButton } from "@/components/atoms/LogoutButton";
+import { MyProfileSection } from "@/components/molecules/mypage/MyProfileSection";
+import type { Me } from "@/components/molecules/mypage/MyProfileSection";
 type Session = {
   id: string;
   songTitle: string;
@@ -61,15 +61,7 @@ function ProgressBar({ value }: { value: number }) {
   );
 }
 
-function Avatar({ name }: { name: string }) {
-  return (
-    <div className="relative h-14 w-14 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
-      <div className="absolute inset-0 grid place-items-center text-sm font-semibold text-neutral-600">
-        {name.slice(0, 1)}
-      </div>
-    </div>
-  );
-}
+
 
 function StatCard({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
   return (
@@ -157,11 +149,41 @@ function AchievementCard({ a }: { a: Achievement }) {
   );
 }
 
+async function getMe(userId: number): Promise<Me> {
+  const res = await fetch(`${process.env.API_BASE_URL}/user/profile/${userId}`, {
+    cache: "no-store",
+    headers: {
+      // 서버가 내부키 요구하면 유지
+      "X-INTERNAL-KEY": process.env.INTERNAL_SYNC_KEY!,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch profile: ${res.status}`);
+  }
+
+  const json = await res.json();
+
+  return {
+    name: json?.data?.username ?? "Unknown",
+    handle: json?.data?.email ?? `user-${userId}`,
+    tier: json?.data?.tier ?? "Bronze",
+    email: json?.data?.email,
+    image: json?.data?.profile_pic ?? null,
+    avg_accuracy: json?.data?.avg_accuracy ?? null,
+    max_combo: json?.data?.max_combo ?? null,
+    play_count: json?.data?.play_count ?? null,
+  };
+}
 export default async function MyPage() {
   const session = await getServerSession(authOptions);
   if(!session) {
     redirect("/login?callbackUrl=/mypage");
   }
+  const userId = (session.user as any)?.user_id;
+  if (!userId) redirect("/login?callbackUrl=/mypage");
+
+  const me = await getMe(Number(userId));
   return (
     <main className="min-h-screen bg-neutral-100">
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -172,41 +194,7 @@ export default async function MyPage() {
         </div> */}
 
         {/* profile */}
-        <section className="mt-6 border-b border-neutral-200 p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <Avatar name={me.name} />
-              <div className="min-w-0">
-                <div className="truncate text-lg font-semibold text-neutral-900">{me.name}</div>
-                <div className="truncate text-sm text-neutral-500">{me.handle}</div>
-
-                <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-800">
-                  Tier: {me.tier}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800">
-                프로필 편집
-              </button>
-            <LogoutButton
-              callbackUrl="/"
-              className="rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50"
-            >
-              로그아웃
-              </LogoutButton>
-            </div>
-          </div>
-        </section>
-
-        {/* stats */}
-        <section className="mt-6 grid gap-4 md:grid-cols-4">
-          <StatCard label="Best WPM" value={me.bestWpm} sub="최고 속도" />
-          <StatCard label="Best Accuracy" value={`${me.bestAccuracy.toFixed(1)}%`} sub="최고 정확도" />
-          <StatCard label="Sessions" value={me.totalSessions} sub="총 플레이 횟수" />
-          <StatCard label="Play Time" value={`${me.totalPlayTimeMin}m`} sub="누적 플레이 시간" />
-        </section>
+       <MyProfileSection me={me}/>
 
         {/* content grid */}
         <section className="mt-12 grid gap-6 md:grid-cols-[1fr_360px]">
