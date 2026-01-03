@@ -43,6 +43,14 @@ function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
     const t = text[i];
     const u = input[j];
 
+    if (t === "\n") {
+      states[i] = "correct";
+      typedAt[i] = null;
+      i++;
+      continue;
+    }
+  
+
     if (t === " ") {
       if (u === " ") {
         states[i] = "correct";
@@ -106,7 +114,9 @@ function parseTyping(text: string, input: string, maxExtra = 5): Parsed {
     inputToExtra,
   };
 }
-
+function normalizeLyric(raw: string) {
+  return raw.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
 export function TypingDisplay({
   text,
   input,
@@ -124,8 +134,8 @@ export function TypingDisplay({
     ? "text-[24px] leading-[36px]"
     : "text-[20px] leading-[30px]"; // md (default)
   
-    const safeText = text ?? "";
-  const parsed = parseTyping(safeText, input, 5);
+    const safeText = normalizeLyric(text ?? ""); 
+    const parsed = parseTyping(safeText, input, 5);
   const effectiveCursor = parsed.cursorIndex;
 
   const composingInputIndex = isComposing ? input.length - 1 : -1;
@@ -143,6 +153,9 @@ export function TypingDisplay({
       ].join(" ")}
     >
       {safeText.split("").map((char, index) => {
+        if (char === "\n") {
+          return <span key={index} className="w-full block h-4" />;
+        }
         const state = parsed.states[index];
         const typed = parsed.typedAt[index];
         const extra = parsed.extrasBeforeSpace[index];

@@ -1,38 +1,52 @@
-import Image from "next/image";
 import { SongTypeBoard } from "@/components/organisms/SongTypeBoard";
-export type Song = {
-  songId: number;
-  title: string;
-  artist: string;
-  lyrice: string;
-}
+import { Song } from "@/types/song";
 
-async function getSong(id: number): Promise<Song>{
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_POSTMAN_URL!;
-  const res = await fetch(
-    `${API_BASE_URL}`,
-    {
-      // 개발 중엔 매번 새로 가져오고 싶으면:
-      cache: "no-store",
-    }
-  )
-  if(!res.ok){
-    throw new Error("Failed to fetch song");
+type ApiSong = {
+  id: number;
+  title: string;
+  author: string;
+  content: string;
+  genre: string;
+  image_url: string;
+};
+
+type ApiResponse<T> = {
+  data: T;
+  success: boolean;
+  error: string | null;
+};
+
+async function getSongs(): Promise<Song[]> {
+  const API_BASE_URL = `${process.env.API_BASE_URL}/text/main`;
+
+  const res = await fetch(API_BASE_URL, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch songs");
   }
-  return res.json();
+
+  const json: ApiResponse<ApiSong[]> = await res.json();
+
+  if (!json.success) {
+    throw new Error(json.error ?? "API error");
+  }
+
+  return json.data.map((item) => ({
+    songId: item.id,
+    title: item.title,
+    artist: item.author,
+    lyric: item.content,
+    imageUrl: item.image_url,
+  }));
 }
 export default async function Home() {
-  const song = await getSong(1);
-  const DUMMY_SONG: Song = {
-    songId: 1,
-    title: "Dummy Song",
-    artist: "Test Artist",
-    lyrice: "오늘도 나는 키보드를 두드린다. 오늘도 나는 키보드를 두드린다. 오늘도 나는 키보드를 두드린다",
-  };
+  const songs = await getSongs();
   
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-neutral-100">
-      <SongTypeBoard song={DUMMY_SONG}/>
+      <SongTypeBoard songs={songs}/>
     </div>
   );
 }

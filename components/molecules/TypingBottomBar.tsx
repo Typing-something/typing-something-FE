@@ -2,16 +2,19 @@
 
 import { ProgressBar } from "../atoms/ProgressBar";
 import { IconButton } from "../atoms/IconButton";
+import Image from "next/image";
+
 type Props = {
   title: string;
   artist: string;
+  imageUrl: string;
   wpm: number;
   cpm: number;
   acc: number;
   progress: number;
 };
 
-export function TypingBottomBar({ title, artist, progress }: Props) {
+export function TypingBottomBar({ title, artist, imageUrl, progress }: Props) {
   return (
     <div className="px-4 py-3">
        <div className="mb-3">
@@ -20,7 +23,15 @@ export function TypingBottomBar({ title, artist, progress }: Props) {
       <div className="flex items-start justify-between gap-4">
         {/* 좌: 메타 */}
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-md bg-neutral-200" />
+        <div className="h-10 w-10 shrink-0 relative overflow-hidden rounded-md bg-neutral-200">
+            <Image
+              src={imageUrl}
+              alt={`${title} cover`}
+              fill
+              className="object-cover"
+              sizes="40px"
+            />
+          </div>
           <div className="leading-tight">
             <div className="text-xs font-semibold text-neutral-900">{title}</div>
             <div className="text-[11px] text-neutral-500">{artist}</div>

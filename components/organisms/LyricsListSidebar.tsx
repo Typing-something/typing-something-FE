@@ -2,25 +2,16 @@
 
 import { SidebarShell } from "../organisms/SidebarShell";
 import { IconButton } from "../atoms/IconButton";
-
-type LyricsItem = {
-  id: number;
-  title: string;
-  singer: string;
-};
-
-const MOCK_ITEMS: LyricsItem[] = Array.from({ length: 9 }).map((_, i) => ({
-  id: i + 1,
-  title: "으르렁",
-  singer: "엑소",
-}));
+import { Song } from "@/types/song";
+import Image from "next/image";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  songs: Song[];
 };
 
-export function LyricsListSidebar({ open, onClose }: Props) {
+export function LyricsListSidebar({ open, onClose, songs }: Props) {
   return (
     <SidebarShell
       open={open}
@@ -29,9 +20,9 @@ export function LyricsListSidebar({ open, onClose }: Props) {
       header={<h2 className="text-lg font-semibold">Current List</h2>}
     >
       <div className="border-t border-neutral-200">
-        {MOCK_ITEMS.map((item, idx) => (
+        {songs.map((item, idx) => (
           <div
-            key={item.id}
+            key={item.songId}
             className="flex items-center border-b border-neutral-200"
           >
             {/* index */}
@@ -40,8 +31,16 @@ export function LyricsListSidebar({ open, onClose }: Props) {
             </div>
 
             {/* image placeholder */}
-            <div className="w-12 h-12 shrink-0 bg-neutral-200 rounded-sm" />
-
+            <div className="w-12 h-12 shrink-0 relative overflow-hidden rounded-sm bg-neutral-200">
+              <Image 
+                src={item.imageUrl}
+                alt={`${item.title} cover`}
+                fill
+                className="object-cover"
+                sizes="48px"
+              />
+            </div>
+            
             {/* content */}
             <button
               type="button"
@@ -51,7 +50,7 @@ export function LyricsListSidebar({ open, onClose }: Props) {
                 {item.title}
               </div>
               <div className="mt-1 text-xs text-neutral-700">
-                {item.singer}
+                {item.artist}
               </div>
             </button>
 
