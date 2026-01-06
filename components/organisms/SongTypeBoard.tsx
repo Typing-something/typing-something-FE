@@ -10,6 +10,7 @@ import TypingControlBar from "../molecules/TypingControlBar";
 import { SettingsSidebar } from "./SettingsSidebar";
 import { LyricsListSidebar } from "./LyricsListSidebar";
 import { Song } from "@/types/song";
+import { parseTypingLine } from "@/utils/parseTypingLine";
 type Props = {
   songs: Song[];
 }
@@ -23,23 +24,35 @@ export function SongTypeBoard({ songs }: Props) {
   const [isLyricsListOpen, setIsLyricsListOpen] = useState(false);
   const [songIndex, setSongIndex] = useState(0);
   const song = songs[songIndex];
-  const text = song?.lyric ?? "가사가 없습니다(디버깅용)";
+  const rawText = song?.lyric ?? "가사가 없습니다(디버깅용)";
+  const text = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
+//   useEffect(() => {
+//   console.log("TEXT NEWLINE SAMPLE:", JSON.stringify(text.slice(0, 80)));
+//   console.log("INPUT NEWLINE SAMPLE:", JSON.stringify(input.slice(0, 80)));
+// }, [text, input]);
+  
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const focusInput = () => inputRef.current?.focus();
 
   const progress = Math.min(Math.round((input.length / text.length) * 100), 100);
   const cursorIndex = Math.min(input.length, text.length);
-
-  const {metrics, resetMetrics} = useLiveTypingMetrics(text, input, isComposing);
-
+  
+  const { metrics, resetMetrics } = useLiveTypingMetrics(text, input, isComposing);
+  
   const wpm = metrics.wpm;
   const cpm = metrics.cpm;
   const acc = metrics.acc;
 
   const [isResultOpen, setIsResultOpen] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
-  const isFinished = input.length >= text.length; // normalize 정책이면 필요시 더 엄격히
+  
+  // const isFinished = input.length >= text.length; // normalize 정책이면 필요시 더 엄격히
+  const stableInput = input.slice(0, Math.max(0, input.length - (isComposing ? 1 : 0)));
+  const parsed = parseTypingLine(text, stableInput, 5);
+  
+  // 모든 글자가 untyped가 아니면 끝(=커서가 끝까지 감)
+  const isFinished = parsed.cursorIndex >= text.length;
 
   /// 컨트롤바로 조작 로직
   const canNext = songIndex < songs.length - 1;

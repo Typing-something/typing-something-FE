@@ -3,12 +3,13 @@
 import { RefObject } from "react";
 import { TypingDisplay } from "./TypingDisplay";
 import { TypingInput } from "../atoms/TypingInput";
+
 type Props = {
   text: string;
   input: string;
   cursorIndex: number;
   onFocusRequest: () => void;
-  inputRef: RefObject<HTMLInputElement | null>;
+  inputRef: RefObject<HTMLTextAreaElement | null>;
   onChangeInput: (v: string) => void;
   isComposing: boolean;
   onComposingChange: (v: boolean) => void;
@@ -24,80 +25,97 @@ export function TypingStage({
   isComposing,
   onComposingChange,
 }: Props) {
-  // const [isComposing, setIsComposing] = useState(false);
+  const lines = splitLines(text);
 
   return (
-    <div className="relative px-6 py-8 space-y-4 cursor-text" onClick={onFocusRequest}>
-        <TypingDisplay
-          text={text}
-          input={input}
-          cursorIndex={cursorIndex}
-          isComposing={isComposing}
-        />
-        <TypingInput
-          ref={inputRef}
-          value={input}
-          onChange={(v) => onChangeInput(normalizeInput(text, v, 5))}
-          onCompositionStart={() => onComposingChange(true)}
-          onCompositionEnd={() => onComposingChange(false)}
-        />
+    <div
+      className="relative px-6 py-8 space-y-4 cursor-text"
+      onClick={onFocusRequest}
+    >
+      <TypingDisplay
+        lines={lines}
+        input={input}
+        cursorIndex={cursorIndex}
+        isComposing={isComposing}
+      />
+      <TypingInput
+        ref={inputRef}
+        value={input}
+        onChange={(v) => onChangeInput(normalizeInputLines(lines, v, 5))}
+        onCompositionStart={() => onComposingChange(true)}
+        onCompositionEnd={() => onComposingChange(false)}
+        isComposing={isComposing} 
+      />
     </div>
   );
 }
-function normalizeInput(text: string, rawInput: string, maxExtra = 5) {
-  let i = 0; // text index
+
+function splitLines(text: string) {
+  return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+}
+
+function normalizeInputLines(lines: string[], rawInput: string, maxExtra = 5) {
+  let line = 0;
+  let col = 0;
   let out = "";
+  const extraCountBySpace: Record<string, number> = {};
 
-  const findNextSpace = (from: number) => {
-    const idx = text.indexOf(" ", from);
-    return idx === -1 ? text.length : idx;
-  };
-
-  // space별 extra 길이 추적
-  const extraCountBySpace: Record<number, number> = {};
+  const curLineText = () => lines[line] ?? "";
 
   for (let k = 0; k < rawInput.length; k++) {
     const u = rawInput[k];
-    if (i >= text.length) break;
 
-    const t = text[i];
+    // 핵심: 입력에 이미 들어온 '\n'은 무조건 다음 줄로 이동
+    if (u === "\n") {
+      out += "\n";
+      line++;
+      col = 0;
+      continue;
+    }
 
-    // text가 space인 자리
+    if (line >= lines.length) break;
+
+    const textLine = curLineText();
+
+    // 라인 끝에서 Space 누르면 다음 줄로(=Space=Enter)
+    if (col >= textLine.length) {
+      if (u === " ") {
+        out += "\n";
+        line++;
+        col = 0;
+      }
+      continue;
+    }
+
+    const t = textLine[col];
+
+    // 타겟이 space인 자리(extra 정책)
     if (t === " ") {
       if (u === " ") {
-        out += u;
-        i++;
+        out += " ";
+        col++;
       } else {
-        // extra는 space칸에 쓰지 않고, space에 머무른 채로 앞에 표시될 후보
-        const cnt = extraCountBySpace[i] ?? 0;
+        const key = `${line}:${col}`;
+        const cnt = extraCountBySpace[key] ?? 0;
         if (cnt < maxExtra) {
-          out += u;                 // ✅ 허용
-          extraCountBySpace[i] = cnt + 1;
-        } else {
-          // ✅ 초과분은 "입력 자체를 무시" (out에 넣지 않음)
+          out += u;
+          extraCountBySpace[key] = cnt + 1;
         }
       }
       continue;
     }
 
-    // text가 일반 글자인 자리인데 user가 space를 누름(규칙 3)
+    // user가 space: 같은 줄에서만 다음 space(또는 라인 끝)로 스킵
     if (u === " ") {
-      const nextSpace = findNextSpace(i);
-      // 스페이스 입력은 nextSpace의 space와 매칭시키기 위해 text 인덱스 점프
-      if (nextSpace < text.length && text[nextSpace] === " ") {
-        out += u;
-        i = nextSpace + 1;
-      } else {
-        // 더 이상 space가 없으면 그냥 소비만
-        out += u;
-        i = nextSpace;
-      }
+      const nextSpace = textLine.indexOf(" ", col);
+      out += " ";
+      col = nextSpace === -1 ? textLine.length : nextSpace + 1;
       continue;
     }
 
-    // 일반 매칭
+    // 일반 문자
     out += u;
-    i++;
+    col++;
   }
 
   return out;
