@@ -7,20 +7,27 @@ type TypingInputProps = {
   onChange: (value: string) => void;
   onCompositionStart?: () => void;
   onCompositionEnd?: () => void;
+  isComposing?: boolean;
 };
 
-export const TypingInput = forwardRef<HTMLInputElement, TypingInputProps>(
-  ({ value, onChange, onCompositionStart, onCompositionEnd }, ref) => {
+export const TypingInput = forwardRef<HTMLTextAreaElement, TypingInputProps>(
+  ({ value, onChange, onCompositionStart, onCompositionEnd, isComposing }, ref) => {
     return (
-      <input
+      <textarea
         ref={ref}
         autoFocus
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onCompositionStart={onCompositionStart}
         onCompositionEnd={onCompositionEnd}
-        // 화면에는 안 보이지만, 포커스는 받을 수 있게
-        className="absolute left-0 top-0 w-px h-px opacity-0 pointer-events-none"
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+          if (isComposing) return;
+          e.preventDefault();
+          onChange(value + "\n");
+        }}
+        spellCheck={false}
+        className="absolute left-0 top-0 w-px h-px opacity-0 pointer-events-none resize-none"
       />
     );
   }
