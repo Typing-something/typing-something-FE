@@ -11,6 +11,9 @@ import { SettingsSidebar } from "./SettingsSidebar";
 import { LyricsListSidebar } from "./LyricsListSidebar";
 import { Song } from "@/types/song";
 import { parseTypingLine } from "@/utils/parseTypingLine";
+import { useSession } from "next-auth/react";
+import { usePostTextResult } from "@/query/usePostTextResult";
+
 type Props = {
   songs: Song[];
 }
@@ -26,6 +29,9 @@ export function SongTypeBoard({ songs }: Props) {
   const song = songs[songIndex];
   const rawText = song?.lyric ?? "가사가 없습니다(디버깅용)";
   const text = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  const { status } = useSession(); // authenticated / unauthenticated / loading
+  const postResultMutation = usePostTextResult();
 
 //   useEffect(() => {
 //   console.log("TEXT NEWLINE SAMPLE:", JSON.stringify(text.slice(0, 80)));
@@ -84,14 +90,38 @@ export function SongTypeBoard({ songs }: Props) {
       if (!isFinished) return;
   
       e.preventDefault();
-  
-      setResult({ wpm: metrics.wpm, cpm: metrics.cpm, acc: metrics.acc });
+
+      const final = { wpm: metrics.wpm, cpm: metrics.cpm, acc: metrics.acc};
+
+      // 1) 로그인 여부 상관없이 모달은 띄움
+      setResult(final);
       setIsResultOpen(true);
+
+      // 2) 로그인 상태일 때만 저장
+      if(status !== "authenticated") return;
+      if(postResultMutation.isPending) return; // 중복 방지
+
+      postResultMutation.mutate({
+        text_id: song.songId,
+        cpm: final.cpm,
+        wpm: final.wpm,
+        accuracy: final.acc,
+        combo: 0,
+      })
     };
   
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isComposing, isFinished, metrics.wpm, metrics.cpm, metrics.acc]);
+  }, [
+    isComposing,
+    isFinished,
+    metrics.wpm,
+    metrics.cpm,
+    metrics.acc,
+    song.songId,
+    status,
+    postResultMutation,
+  ]);
  
   if(!songs || songs.length === 0) {
     return <div className="w-full max-w-4xl">곡이 없습니다.</div>
