@@ -8,14 +8,12 @@ export type PostTextResultPayload = {
   };
   
   export async function postTextResult(payload: PostTextResultPayload) {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/text/results`,
-      {
+    const res = await fetch("/api/text/results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }
-    );
+      });
+    
   
     if (!res.ok) {
       throw new Error("결과 저장 실패");
