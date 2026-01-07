@@ -9,7 +9,7 @@ export type PostTextResultPayload = {
   
   export async function postTextResult(payload: PostTextResultPayload) {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/text/results`,
+      `${process.env.API_BASE_URL}/text/results`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
