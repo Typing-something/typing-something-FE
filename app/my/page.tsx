@@ -5,17 +5,35 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { MyProfileSection } from "@/components/molecules/mypage/MyProfileSection";
 import type { Me } from "@/components/molecules/mypage/MyProfileSection";
-type Session = {
-  id: string;
-  songTitle: string;
-  artist: string;
-  playedAt: string; // e.g. "2025-12-28 14:10"
+import { RecentResultSection } from "@/components/organisms/RecentResultSection";
+
+type ApiRecentResult = {
+  result_id: number;
+  date: string; // "2026-01-07 15:49"
+  wpm: number;
+  cpm: number;
+  accuracy: number; // 0~100 (이미 퍼센트)
+  combo: number;
+  text_info: {
+    id: number;
+    title: string;
+    author: string;
+    genre: string;
+    content_preview: string;
+    image_url: string;
+  };
+};
+export type RecentSession = {
+  resultId: number; // 결과 id
+  songId: number; // 곡 id
+  title: string;
+  author: string;
+  imageUrl: string;
+  playedAt: string;
   wpm: number;
   accuracy: number;
   combo: number;
-  durationSec: number;
-};
-
+}
 type Achievement = {
   id: string;
   title: string;
@@ -24,24 +42,6 @@ type Achievement = {
   earned: boolean;
   earnedAt?: string;
 };
-
-const me = {
-  name: "You",
-  handle: "@me",
-  tier: "Silver",
-  bestWpm: 132,
-  bestAccuracy: 99.1,
-  totalSessions: 84,
-  totalPlayTimeMin: 312,
-};
-
-const sessions: Session[] = [
-  { id: "s1", songTitle: "으르렁", artist: "엑소", playedAt: "2025-12-28 14:10", wpm: 104, accuracy: 94.3, combo: 18, durationSec: 92 },
-  { id: "s2", songTitle: "Ditto", artist: "NewJeans", playedAt: "2025-12-27 22:31", wpm: 112, accuracy: 96.8, combo: 25, durationSec: 88 },
-  { id: "s3", songTitle: "밤편지", artist: "아이유", playedAt: "2025-12-26 19:04", wpm: 98, accuracy: 97.5, combo: 31, durationSec: 105 },
-  { id: "s4", songTitle: "Next Level", artist: "aespa", playedAt: "2025-12-25 23:12", wpm: 120, accuracy: 95.2, combo: 22, durationSec: 80 },
-  { id: "s5", songTitle: "Hype Boy", artist: "NewJeans", playedAt: "2025-12-25 10:49", wpm: 109, accuracy: 93.8, combo: 16, durationSec: 90 },
-];
 
 const achievements: Achievement[] = [
   { id: "a1", title: "첫 플레이", desc: "첫 타이핑 세션 완료", progress: 100, earned: true, earnedAt: "2025-12-01" },
@@ -73,44 +73,6 @@ function StatCard({ label, value, sub }: { label: string; value: React.ReactNode
   );
 }
 
-function SessionRow({ s }: { s: Session }) {
-  const mm = Math.floor(s.durationSec / 60);
-  const ss = s.durationSec % 60;
-  const duration = `${mm}:${String(ss).padStart(2, "0")}`;
-
-  return (
-    <li className="flex items-center gap-4 px-5 py-4 hover:bg-neutral-50">
-      <div className="w-14 text-center text-sm font-semibold text-neutral-700 tabular-nums">{/* rank placeholder */}</div>
-
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold text-neutral-900">
-          {s.songTitle} <span className="text-neutral-400">·</span> {s.artist}
-        </div>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-          <span>{s.playedAt}</span>
-          <span className="text-neutral-300">•</span>
-          <span>{duration}</span>
-        </div>
-      </div>
-
-      <div className="hidden sm:flex items-center gap-2">
-        <div className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold tabular-nums text-neutral-800">
-          {s.wpm} WPM
-        </div>
-        <div className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold tabular-nums text-neutral-800">
-          {s.accuracy.toFixed(1)}%
-        </div>
-        <div className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold tabular-nums text-neutral-800">
-          x{s.combo}
-        </div>
-      </div>
-
-      <button className="ml-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">
-        상세
-      </button>
-    </li>
-  );
-}
 
 function AchievementCard({ a }: { a: Achievement }) {
     const accent = a.earned ? "#fb4058" : undefined;
@@ -175,6 +137,35 @@ async function getMe(userId: number): Promise<Me> {
     play_count: json?.data?.play_count ?? null,
   };
 }
+function mapToRecentSessions(rows: ApiRecentResult[]): RecentSession[] {
+  return rows.map((r) => ({
+    resultId: r.result_id,
+    songId: r.text_info.id,
+    title: r.text_info.title,
+    author: r.text_info.author.trim(),
+    imageUrl: r.text_info.image_url,
+    playedAt: r.date,
+    wpm: r.wpm,
+    accuracy: r.accuracy,
+    combo: r.combo,
+  }));
+}
+async function getRecenResults(userId: number) {
+  const res = await fetch(
+    `${process.env.API_BASE_URL}/user/history/recent/${userId}?limit=10`, {
+      cache: "no-store",
+      headers: {
+        // 서버가 내부키 요구하면 유지
+        "X-INTERNAL-KEY": process.env.INTERNAL_SYNC_KEY!,
+      },
+  });
+
+  if(!res.ok) {
+    throw new Error(`Failed to fetch recent results: ${res.status}`);
+  }
+  const json = await res.json();
+  return mapToRecentSessions(json.data);
+}
 export default async function MyPage() {
   const session = await getServerSession(authOptions);
   if(!session) {
@@ -184,6 +175,7 @@ export default async function MyPage() {
   if (!userId) redirect("/login?callbackUrl=/mypage");
 
   const me = await getMe(Number(userId));
+  const recentResults = await getRecenResults(Number(userId));
   return (
     <main className="min-h-screen bg-neutral-100">
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -199,20 +191,7 @@ export default async function MyPage() {
         {/* content grid */}
         <section className="mt-12 grid gap-6 md:grid-cols-[1fr_360px]">
           {/* left: sessions */}
-          <div className="min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-              <div className="text-sm font-semibold text-neutral-900">최근 타이핑 기록</div>
-              <button className="text-xs font-semibold text-neutral-600 hover:text-neutral-900">
-                전체 보기
-              </button>
-            </div>
-
-            <ul className="divide-y divide-neutral-200">
-              {sessions.map((s) => (
-                <SessionRow key={s.id} s={s} />
-              ))}
-            </ul>
-          </div>
+         <RecentResultSection recentResults={recentResults}/>
 
           {/* right: achievements */}
           <aside className="min-w-0">
