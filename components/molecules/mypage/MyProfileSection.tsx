@@ -1,16 +1,7 @@
 import { LogoutButton } from "@/components/atoms/LogoutButton"
 import { Avatar } from "@/components/atoms/mypage/Avatar"
 import { StatCard } from "./StatCard";
-export type Me = {
-    name: string;
-    handle: string;
-    tier: string;
-    email: string;
-    image: string;
-    avg_accuracy: number;
-    max_combo: number;
-    play_count: number;
-  };
+import { Me } from "@/types/me";
   export function MyProfileSection({ me }: { me: Me }) {
     return (
       <section className="mt-6 overflow-hidden border-neutral-200">
@@ -18,7 +9,19 @@ export type Me = {
         <div className="p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <Avatar name={me.name} />
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full">
+            {me.image ? (
+                <img
+                  src={me.image}
+                  alt={me.name}
+                  className="h-full w-full object-cover"
+                />
+            ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-neutral-500">
+                        {me.name[0]}
+                    </div>
+                ) }          
+            </div>
               <div className="min-w-0">
                 <div className="flex space-x-2 items-center justify-center">
                   <div className="truncate text-lg font-semibold text-neutral-900">
