@@ -4,9 +4,9 @@ import { authOptions } from "../api/auth/[...nextauth]/authOption";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { MyProfileSection } from "@/components/molecules/mypage/MyProfileSection";
-import type { Me } from "@/components/molecules/mypage/MyProfileSection";
 import { RecentResultSection } from "@/components/organisms/RecentResultSection";
-
+import { getMe } from "@/lib/api/user";
+import { Me } from "@/types/me";
 type ApiRecentResult = {
   result_id: number;
   date: string; // "2026-01-07 15:49"
@@ -111,32 +111,7 @@ function AchievementCard({ a }: { a: Achievement }) {
   );
 }
 
-async function getMe(userId: number): Promise<Me> {
-  const res = await fetch(`${process.env.API_BASE_URL}/user/profile/${userId}`, {
-    cache: "no-store",
-    headers: {
-      // 서버가 내부키 요구하면 유지
-      "X-INTERNAL-KEY": process.env.INTERNAL_SYNC_KEY!,
-    },
-  });
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch profile: ${res.status}`);
-  }
-
-  const json = await res.json();
-
-  return {
-    name: json?.data?.username ?? "Unknown",
-    handle: json?.data?.email ?? `user-${userId}`,
-    tier: json?.data?.tier ?? "Bronze",
-    email: json?.data?.email,
-    image: json?.data?.profile_pic ?? null,
-    avg_accuracy: json?.data?.avg_accuracy ?? null,
-    max_combo: json?.data?.max_combo ?? null,
-    play_count: json?.data?.play_count ?? null,
-  };
-}
 function mapToRecentSessions(rows: ApiRecentResult[]): RecentSession[] {
   return rows.map((r) => ({
     resultId: r.result_id,
