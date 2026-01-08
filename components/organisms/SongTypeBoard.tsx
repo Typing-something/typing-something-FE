@@ -52,6 +52,11 @@ export function SongTypeBoard({ songs }: Props) {
 
   const [isResultOpen, setIsResultOpen] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+
+  // topbar디스플레이용 metrics
+  const displayWpm = isResultOpen ? 0 : metrics.wpm;
+  const displayCpm = isResultOpen ? 0 : metrics.cpm;
+  const displayAcc = isResultOpen ? 100 : metrics.acc;
   
   // const isFinished = input.length >= text.length; // normalize 정책이면 필요시 더 엄격히
   const stableInput = input.slice(0, Math.max(0, input.length - (isComposing ? 1 : 0)));
@@ -63,13 +68,24 @@ export function SongTypeBoard({ songs }: Props) {
   /// 컨트롤바로 조작 로직
   const canNext = songIndex < songs.length - 1;
 
+  const handleCloseResult = () => {
+    setIsResultOpen(false);
+
+    if(result && canNext){
+      goNextSong();
+    }
+    // 마지막 곡이면 현재 곡 다시 시작
+    if(result && !canNext){
+      resetForSong();
+    }
+  }
   const resetForSong = () => {
     setInput("");
     setIsComposing(false);
     setIsResultOpen(false);
     setResult(null);
     resetMetrics();
-    focusInput();
+    requestAnimationFrame(() => focusInput());
   };
 
   const goNextSong = () => {
@@ -133,9 +149,9 @@ export function SongTypeBoard({ songs }: Props) {
          ======================= */}
       <div className="mb-16">
         <TypingTopBar 
-          wpm={wpm} 
-          cpm={cpm} 
-          acc={acc}
+          wpm={displayWpm} 
+          cpm={displayCpm} 
+          acc={displayAcc}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenLyricsList={() => setIsLyricsListOpen(true)}
         />
@@ -186,7 +202,14 @@ export function SongTypeBoard({ songs }: Props) {
         <ResultModal
           open={isResultOpen}
           result={result}
-          onClose={() => setIsResultOpen(false)}
+          onClose={handleCloseResult}
+          song={{
+            songId: song.songId,
+            imageUrl: song.imageUrl,
+            title: song.title,
+            artist: song.artist,
+            lyric: text,
+          }}
         />
          {/* =======================
            사이드 세팅 바
