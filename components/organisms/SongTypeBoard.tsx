@@ -68,6 +68,8 @@ export function SongTypeBoard({ songs }: Props) {
   /// 컨트롤바로 조작 로직
   const canNext = songIndex < songs.length - 1;
 
+  const pendingFocusRef = useRef(false); //true:  포커스를 줘야 할 일이 예약되어 있음
+
   const handleCloseResult = () => {
     setIsResultOpen(false);
 
@@ -93,6 +95,28 @@ export function SongTypeBoard({ songs }: Props) {
     setSongIndex((i) => i + 1);
   };
   /// 컨트롤바로 조작 로직 end
+
+  // 사이드바 리스트에서 인덱스 조작
+  const selectSong = (nextIndex: number) => {
+    if (nextIndex === songIndex) return;
+
+    pendingFocusRef.current = true;
+    setSongIndex(nextIndex);
+    setIsLyricsListOpen(false); // 먼저 닫기
+  };
+
+  useEffect(() => {
+    if (!isLyricsListOpen && pendingFocusRef.current) {
+      pendingFocusRef.current = false;
+  
+      // 닫힘 애니메이션/렌더 후 포커스 (2프레임)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          inputRef.current?.focus({ preventScroll: true });
+        });
+      });
+    }
+  }, [isLyricsListOpen]);
 
   useEffect(() => {
     resetForSong();
@@ -225,6 +249,8 @@ export function SongTypeBoard({ songs }: Props) {
           open={isLyricsListOpen}
           onClose={() => setIsLyricsListOpen(false)}
           songs={songs}
+          activeIndex={songIndex}
+          onSelectSong={selectSong}
          />
         </div>
   );

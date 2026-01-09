@@ -15,7 +15,7 @@ export const TypingInput = forwardRef<HTMLTextAreaElement, TypingInputProps>(
     return (
       <textarea
         ref={ref}
-        autoFocus
+        // autoFocus
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onCompositionStart={onCompositionStart}
