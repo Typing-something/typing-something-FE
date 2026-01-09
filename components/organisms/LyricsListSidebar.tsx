@@ -9,9 +9,11 @@ type Props = {
   open: boolean;
   onClose: () => void;
   songs: Song[];
+  activeIndex: number;
+  onSelectSong: (index: number) => void;
 };
 
-export function LyricsListSidebar({ open, onClose, songs }: Props) {
+export function LyricsListSidebar({ open, onClose, songs, activeIndex, onSelectSong }: Props) {
   return (
     <SidebarShell
       open={open}
@@ -20,11 +22,20 @@ export function LyricsListSidebar({ open, onClose, songs }: Props) {
       header={<h2 className="text-lg font-semibold">Current List</h2>}
     >
       <div className="border-t border-neutral-200">
-        {songs.map((item, idx) => (
-          <div
+        {songs.map((item, idx) => {
+          const isActive = idx === activeIndex
+          return (
+            <div
             key={item.songId}
-            className="flex items-center border-b border-neutral-200"
-          >
+            onClick={() => {
+              if(idx === activeIndex) return;
+              onSelectSong(idx)
+            }}
+            className={[
+              "flex items-center border-b border-neutral-200", // ✅ 항상 bottom border 색 유지
+              isActive ? "border-l-2 border-l-[#fb4058] bg-neutral-100" : ""
+            ].join(" ")}
+            >
             {/* index */}
             <div className="w-10 shrink-0 flex justify-center text-sm text-neutral-800">
               {idx + 1}
@@ -61,7 +72,8 @@ export function LyricsListSidebar({ open, onClose, songs }: Props) {
               </IconButton>
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
     </SidebarShell>
   );
