@@ -8,20 +8,21 @@ type ApiSong = {
   content: string;
   genre: string;
   image_url: string;
+  is_favorite: boolean;
 };
 
 type ApiResponse<T> = {
   data: T;
   success: boolean;
-  error: string | null;
+  message: string;
+  //error: string | null;
 };
 
 async function getSongs(): Promise<Song[]> {
-  const API_BASE_URL = `${process.env.API_BASE_URL}/text/main`;
+  const API_BASE_URL = `${process.env.API_BASE_URL}/text/main/10`;
+  console.log("머임", API_BASE_URL)
 
-  const res = await fetch(API_BASE_URL, {
-    cache: "no-store",
-  });
+  const res = await fetch(API_BASE_URL, { cache: "no-store" });
 
   if (!res.ok) {
     throw new Error("Failed to fetch songs");
@@ -30,7 +31,7 @@ async function getSongs(): Promise<Song[]> {
   const json: ApiResponse<ApiSong[]> = await res.json();
 
   if (!json.success) {
-    throw new Error(json.error ?? "API error");
+    throw new Error(json.message ?? "API error");
   }
 
   return json.data.map((item) => ({
