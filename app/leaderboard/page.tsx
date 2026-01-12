@@ -4,7 +4,7 @@ import { authOptions } from "../api/auth/[...nextauth]/authOption";
 import { getServerSession } from "next-auth";
 import { getMe } from "@/lib/api/user";
 import { getRanking } from "@/lib/api/ranking";
-import { Leader } from "@/lib/api/ranking";
+import { Leader } from "@/types/leaderboard";
 import { Row } from "@/components/organisms/LeaderboardRow";
 
 export default async function LeaderboardPage() {

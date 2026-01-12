@@ -1,4 +1,4 @@
-import { Leader } from "@/lib/api/ranking";
+import { Leader } from "@/types/leaderboard";
 export function Row({ u, highlight }: { u: Leader; highlight?: boolean }) {
     return (
       <li

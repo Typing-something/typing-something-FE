@@ -1,15 +1,6 @@
 // lib/api/ranking.ts
 import type { GetRankingResponse } from "@/types/ranking";
-
-export type Leader = {
-  rank: number;
-  name: string;
-  handle: string;
-  imageUrl: string;
-  wpm: number;
-  accuracy: number;
-  combo: number;
-};
+import { Leader } from "@/types/leaderboard";
 
 export async function getRanking(): Promise<Leader[]> {
   const res = await fetch(`${process.env.API_BASE_URL}/user/ranking`, {
