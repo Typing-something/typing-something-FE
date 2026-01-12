@@ -1,5 +1,5 @@
 import { Avatar } from "../atoms/mypage/Avatar";
-import { Leader } from "@/app/leaderboard/page";
+import { Leader } from "@/types/leaderboard";
 
 export function MyRankSideCard({ me }: { me: Leader }) {
     return (
