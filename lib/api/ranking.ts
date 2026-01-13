@@ -16,11 +16,13 @@ export async function getRanking(): Promise<Leader[]> {
   if (!json.success) throw new Error(json.message || "Failed to fetch ranking");
 
   return (json.data ?? []).map((item) => {
+    const userId = item.account.user_id;
     const name = item.account.username;
     const handle = `@user${item.account.user_id}`; // 서버에 handle 없으니 일단 이렇게
     const imageUrl = item.account.profile_pic || "imsi";
 
     return {
+      userId,
       rank: item.rank,
       name,
       handle,

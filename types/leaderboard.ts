@@ -1,4 +1,5 @@
 export type Leader = {
+    userId: number;  
     rank: number;
     name: string;
     handle: string;

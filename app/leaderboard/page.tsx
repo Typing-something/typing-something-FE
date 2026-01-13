@@ -17,11 +17,12 @@ export default async function LeaderboardPage() {
   
     const myRank: Leader | null = me 
     ? {
-      rank: 0, // TODO: 서버에서 내려주면 교체
+      userId: me.userId ?? null,
+      rank: me.ranking_score ?? 0,
       name: me.name,
       handle: me.handle,
       imageUrl: me.image ?? "imsi",
-      wpm: 0, // TODO: 서버 통계 붙으면 교체
+      wpm: me.avg_wpm ?? 0,
       accuracy: me.avg_accuracy ?? 0,
       combo: me.max_combo ?? 0,
     }
@@ -60,7 +61,7 @@ export default async function LeaderboardPage() {
                     <Row
                       key={u.rank}
                       u={u}
-                      highlight={u.rank === (myRank?.rank ?? -1)}
+                      highlight={u.userId === (myRank?.userId ?? -1)}
                     />
                   ))}
                 </ul>

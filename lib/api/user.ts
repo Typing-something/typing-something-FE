@@ -46,13 +46,15 @@ export async function getMe(userId: number): Promise<Me> {
   const { account, stats } = json.data;
 
   return {
+    userId: account.user_id ?? null,
     name: account.username ?? "Unknown",
-    handle: account.email ?? `user-${userId}`,
+    handle: `@user${account.user_id}`,
     tier: "Bronze",
     email: account.email,
     image: account.profile_pic ?? null,
-
+    ranking_score: account.ranking_score ?? null,
     avg_accuracy: stats.avg_accuracy ?? null,
+    avg_wpm: stats.avg_wpm ?? null,
     max_combo: stats.max_combo ?? null,
     play_count: stats.play_count ?? null,
   };
