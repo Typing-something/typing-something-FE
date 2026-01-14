@@ -4,4 +4,5 @@ export type Song = {
     artist: string;
     lyric: string;
     imageUrl: string;
+    isFavorite: boolean;
 };

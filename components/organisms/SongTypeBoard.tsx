@@ -13,6 +13,7 @@ import { Song } from "@/types/song";
 import { parseTypingLine } from "@/utils/parseTypingLine";
 import { useSession } from "next-auth/react";
 import { usePostTextResult } from "@/query/usePostTextResult";
+import { usePostFavorite } from "@/query/usePostFavorite";
 
 type Props = {
   songs: Song[];
@@ -26,13 +27,17 @@ export function SongTypeBoard({ songs }: Props) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLyricsListOpen, setIsLyricsListOpen] = useState(false);
   const [songIndex, setSongIndex] = useState(0);
-  const song = songs[songIndex];
+  const [localSongs, setLocalSongs] = useState<Song[]>(songs)
+  const song = localSongs[songIndex];
   const rawText = song?.lyric ?? "가사가 없습니다(디버깅용)";
   const text = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-  const { status } = useSession(); // authenticated / unauthenticated / loading
-  const postResultMutation = usePostTextResult();
+  const { data: session, status } = useSession(); // authenticated / unauthenticated / loading
+  const userId = session?.user.user_id;
+  
 
+  const postResultMutation = usePostTextResult();
+  const postFavoriteMutation = usePostFavorite();
 //   useEffect(() => {
 //   console.log("TEXT NEWLINE SAMPLE:", JSON.stringify(text.slice(0, 80)));
 //   console.log("INPUT NEWLINE SAMPLE:", JSON.stringify(input.slice(0, 80)));
@@ -66,7 +71,7 @@ export function SongTypeBoard({ songs }: Props) {
   const isFinished = parsed.cursorIndex >= text.length;
 
   /// 컨트롤바로 조작 로직
-  const canNext = songIndex < songs.length - 1;
+  const canNext = songIndex < localSongs.length - 1;
 
   const pendingFocusRef = useRef(false); //true:  포커스를 줘야 할 일이 예약되어 있음
 
@@ -105,6 +110,41 @@ export function SongTypeBoard({ songs }: Props) {
     setIsLyricsListOpen(false); // 먼저 닫기
   };
 
+  const toggleFavorite = async (textId: number) => {
+    console.log("fav click", { status, userId, pending: postFavoriteMutation.isPending });
+
+    if (status !== "authenticated") return;
+    if (!userId) return;
+    if (postFavoriteMutation.isPending) return;
+  
+    // 현재 값 저장(rollback용)
+    const prev = localSongs.find((s) => s.songId === textId)?.isFavorite ?? false;
+  
+    // optimistic: 먼저 반전
+    setLocalSongs((prevSongs) =>
+      prevSongs.map((s) =>
+        s.songId === textId ? { ...s, isFavorite: !s.isFavorite } : s
+      )
+    );
+  
+    try {
+      await postFavoriteMutation.mutateAsync({
+        user_id: userId,
+        text_id: textId,
+      });
+      // 성공이면 noop (이미 UI 반영됨)
+    } catch {
+      // 실패면 rollback
+      setLocalSongs((prevSongs) =>
+        prevSongs.map((s) =>
+          s.songId === textId ? { ...s, isFavorite: prev } : s
+        )
+      );
+    }
+  };
+
+  useEffect(() => setLocalSongs(songs), [songs])
+  
   useEffect(() => {
     if (!isLyricsListOpen && pendingFocusRef.current) {
       pendingFocusRef.current = false;
@@ -163,7 +203,7 @@ export function SongTypeBoard({ songs }: Props) {
     postResultMutation,
   ]);
  
-  if(!songs || songs.length === 0) {
+  if(!localSongs || localSongs.length === 0) {
     return <div className="w-full max-w-4xl">곡이 없습니다.</div>
   }
   return (
@@ -212,10 +252,9 @@ export function SongTypeBoard({ songs }: Props) {
               title={song.title}
               artist={song.artist}
               imageUrl={song.imageUrl}
-              wpm={wpm}
-              cpm={cpm}
-              acc={acc}
               progress={progress}
+              isFavorite={song.isFavorite}
+              onToggleFavorite={() => toggleFavorite(song.songId)}
             />
          </div>
        </div>
@@ -233,7 +272,9 @@ export function SongTypeBoard({ songs }: Props) {
             title: song.title,
             artist: song.artist,
             lyric: text,
+            isFavorite: song.isFavorite,
           }}
+          onToggleFavorite={() => toggleFavorite(song.songId)}
         />
          {/* =======================
            사이드 세팅 바
@@ -248,7 +289,7 @@ export function SongTypeBoard({ songs }: Props) {
          <LyricsListSidebar 
           open={isLyricsListOpen}
           onClose={() => setIsLyricsListOpen(false)}
-          songs={songs}
+          songs={localSongs}
           activeIndex={songIndex}
           onSelectSong={selectSong}
          />

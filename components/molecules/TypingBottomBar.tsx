@@ -8,13 +8,12 @@ type Props = {
   title: string;
   artist: string;
   imageUrl: string;
-  wpm: number;
-  cpm: number;
-  acc: number;
   progress: number;
+  isFavorite: boolean;
+  onToggleFavorite?: () => void;
 };
 
-export function TypingBottomBar({ title, artist, imageUrl, progress }: Props) {
+export function TypingBottomBar({ title, artist, imageUrl, progress, isFavorite, onToggleFavorite }: Props) {
   return (
     <div className="px-4 py-3">
        <div className="mb-3">
@@ -40,7 +39,7 @@ export function TypingBottomBar({ title, artist, imageUrl, progress }: Props) {
 
         {/* 우: bookmark/like */}
          <div className="flex items-center gap-2">
-                <IconButton ariaLabel="찜" variant="ghost">
+                {/* <IconButton ariaLabel="찜" variant="ghost">
                   <svg viewBox="0 0 20 20" className="size-5" fill="currentColor">
                     <path
                       fillRule="evenodd"
@@ -48,10 +47,26 @@ export function TypingBottomBar({ title, artist, imageUrl, progress }: Props) {
                       clipRule="evenodd"
                     />
                   </svg>
-                </IconButton>
+                </IconButton> */}
         
-                <IconButton ariaLabel="좋아요" variant="ghost">
-                  <svg viewBox="0 0 20 20" className="size-5" fill="currentColor">
+                <IconButton 
+                  ariaLabel="좋아요"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFavorite?.();
+                  }}
+                >
+                <svg
+                  viewBox="0 0 20 20"
+                  className={[
+                    "size-5 transition-all",
+                    isFavorite ? "text-neutral-600" : "text-neutral-400"
+                  ].join(" ")}
+                  fill={isFavorite ? "currentColor" : "none"}
+                  stroke={isFavorite ? "none" : "currentColor"}
+                  strokeWidth={1.6}
+                >
                     <path d="m9.653 16.915-.005-.003-.019-.01a20.759 20.759 0 0 1-1.162-.682 22.045 22.045 0 0 1-2.582-1.9C4.045 12.733 2 10.352 2 7.5a4.5 4.5 0 0 1 8-2.828A4.5 4.5 0 0 1 18 7.5c0 2.852-2.044 5.233-3.885 6.82a22.049 22.049 0 0 1-3.744 2.582l-.019.01-.005.003h-.002a.739.739 0 0 1-.69.001l-.002-.001Z" />
                   </svg>
                 </IconButton>

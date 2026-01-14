@@ -1,9 +1,10 @@
 "use client"
 import { ReactNode } from "react"
+import { MouseEventHandler } from "react"
 type Props = {
     children: ReactNode;
     ariaLabel: string;
-    onClick?: () => void;
+    onClick?: MouseEventHandler<HTMLButtonElement>;
     disabled?: boolean; 
     variant?: "default" | "ghost";
 }
