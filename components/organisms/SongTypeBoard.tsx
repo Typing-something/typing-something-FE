@@ -329,9 +329,9 @@ export function SongTypeBoard({ songs }: Props) {
          {isPrefetching && (
             <div className="text-xs text-neutral-500 mt-2">다음 곡 불러오는 중...</div>
           )}
-          <div className="text-xs text-neutral-500 mt-2">
+          {/* <div className="text-xs text-neutral-500 mt-2">
             total: {localSongs.length} / index: {songIndex} / canNext: {String(canNext)}
-          </div>
+          </div> */}
         </div>
          
   );
