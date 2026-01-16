@@ -1,27 +1,38 @@
-import { LogoutButton } from "@/components/atoms/LogoutButton"
-import { Avatar } from "@/components/atoms/mypage/Avatar"
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { LogoutButton } from "@/components/atoms/LogoutButton";
 import { StatCard } from "./StatCard";
 import { Me } from "@/types/me";
-  export function MyProfileSection({ me }: { me: Me }) {
-    return (
+import EditProfileModal from "@/components/organisms/EditProfileModal";
+import { EditProfileSubmitPayload } from "@/components/organisms/EditProfileForm";
+
+export function MyProfileSection({ me }: { me: Me }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
       <section className="mt-6 overflow-hidden border-neutral-200">
         {/* header */}
         <div className="p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full">
-            {me.image ? (
-                <img
-                  src={me.image}
-                  alt={me.name}
-                  className="h-full w-full object-cover"
-                />
-            ) : (
-                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-neutral-500">
-                        {me.name[0]}
-                    </div>
-                ) }          
-            </div>
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full">
+                {me.image ? (
+                  <img
+                    src={me.image}
+                    alt={me.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-neutral-500">
+                    {me.name?.[0] ?? "?"}
+                  </div>
+                )}
+              </div>
+
               <div className="min-w-0">
                 <div className="flex space-x-2 items-center justify-center">
                   <div className="truncate text-lg font-semibold text-neutral-900">
@@ -31,14 +42,19 @@ import { Me } from "@/types/me";
                     {me.tier}
                   </div>
                 </div>
-                <div className="truncate text-sm text-neutral-500">{me.handle}</div>                
+                <div className="truncate text-sm text-neutral-500">{me.handle}</div>
               </div>
             </div>
-  
+
             <div className="flex flex-wrap gap-2">
-              <button className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800">
+              <button
+                type="button"
+                onClick={() => setOpen(true)} // ✅ 여기만 추가
+                className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800"
+              >
                 프로필 편집
               </button>
+
               <LogoutButton
                 callbackUrl="/"
                 className="rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50"
@@ -48,11 +64,11 @@ import { Me } from "@/types/me";
             </div>
           </div>
         </div>
-  
+
         {/* divider */}
         <div className="h-px bg-neutral-200" />
-  
-        {/* stats header (스크린샷 느낌) */}
+
+        {/* stats header */}
         <div className="p-5">
           <div className="flex items-center gap-3 text-neutral-900">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -62,31 +78,26 @@ import { Me } from "@/types/me";
             </svg>
             <div className="text-lg font-black tracking-tight">STATS</div>
           </div>
-  
+
           <div className="mt-6 text-sm font-semibold tracking-[0.18em] text-neutral-500">
             TYPING RECORDS
           </div>
-  
-          {/* 3 columns, spread */}
+
           <div className="mt-6 grid gap-10 lg:grid-cols-3">
             <StatCard
               label="ACC"
               sub="평균 정확도"
-              value={
-                me.avg_accuracy == null
-                  ? "—"
-                  : `${me.avg_accuracy.toFixed(1)}%`
-              }
+              value={me.avg_accuracy == null ? "—" : `${me.avg_accuracy.toFixed(1)}%`}
               accent="text-neutral-600"
             />
-  
+
             <StatCard
               label="SESSIONS"
               sub="총 플레이 횟수"
               value={me.play_count ?? 0}
               accent="text-neutral-600"
             />
-  
+
             <StatCard
               label="MAX COMBO"
               sub="최고 콤보"
@@ -95,9 +106,24 @@ import { Me } from "@/types/me";
             />
           </div>
         </div>
-  
-        {/* bottom divider (원하면) */}
+
         <div className="h-px bg-neutral-200" />
       </section>
-    );
-  }
+
+
+      <EditProfileModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        initialName={me.name}
+        initialImageUrl={me.image ?? null}
+        onSubmit={async ({ name, imageFile }: EditProfileSubmitPayload) => {
+          // TODO: 여기서 업데이트 API 호출
+          // await updateMyProfile({ name, imageFile })
+
+          setOpen(false);
+          router.refresh(); // 서버컴포넌트(MyPage) 재실행 → getMe 다시 받아옴
+        }}
+      />
+    </>
+  );
+}

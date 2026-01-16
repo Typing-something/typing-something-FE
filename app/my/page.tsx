@@ -61,19 +61,6 @@ function ProgressBar({ value }: { value: number }) {
   );
 }
 
-
-
-function StatCard({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
-  return (
-    <div className="border-b border-neutral-200 p-4">
-      <div className="text-xs font-semibold text-neutral-500">{label}</div>
-      <div className="mt-2 text-2xl font-bold text-neutral-900 tabular-nums">{value}</div>
-      {sub && <div className="mt-1 text-xs text-neutral-500">{sub}</div>}
-    </div>
-  );
-}
-
-
 function AchievementCard({ a }: { a: Achievement }) {
     const accent = a.earned ? "#fb4058" : undefined;
   return (
@@ -141,6 +128,7 @@ async function getRecenResults(userId: number) {
   const json = await res.json();
   return mapToRecentSessions(json.data);
 }
+
 export default async function MyPage() {
   const session = await getServerSession(authOptions);
   if(!session) {
@@ -151,6 +139,7 @@ export default async function MyPage() {
 
   const me = await getMe(Number(userId));
   const recentResults = await getRecenResults(Number(userId));
+
   return (
     <main className="min-h-screen bg-neutral-100">
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
