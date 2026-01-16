@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { TypingBottomBar } from "../molecules/TypingBottomBar";
 import { TypingStage } from "../molecules/TypingStage";
 import { TypingTopBar } from "../molecules/TypingTopBar";
@@ -14,6 +14,7 @@ import { parseTypingLine } from "@/utils/parseTypingLine";
 import { useSession } from "next-auth/react";
 import { usePostTextResult } from "@/query/usePostTextResult";
 import { usePostFavorite } from "@/query/usePostFavorite";
+import { usePrefetchSongs } from "@/hooks/usePrefetchSongs";
 
 type Props = {
   songs: Song[];
@@ -22,19 +23,47 @@ type Props = {
 type Result = { wpm: number; cpm: number; acc: number };
 
 export function SongTypeBoard({ songs }: Props) {
+  const { data: session, status } = useSession(); // authenticated / unauthenticated / loading
+  const userId = session?.user.user_id;
+  const [songIndex, setSongIndex] = useState(0);
+
+  const fetchMoreSongs = useCallback(async (userId?: number): Promise<Song[]> => {
+    const url = new URL("/api/text/main", window.location.origin);
+    if (userId) url.searchParams.set("user_id", String(userId));
+  
+    const res = await fetch(url.toString(), { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch more songs");
+  
+    const json = await res.json(); // 백엔드 응답 그대로
+    if (!json.success) throw new Error(json.message ?? "API error");
+  
+    return (json.data ?? []).map((item: any) => ({
+      songId: item.id,
+      title: item.title,
+      artist: item.author,
+      lyric: item.content,
+      imageUrl: item.image_url,
+      isFavorite: item.is_favorite,
+    }));
+  }, []);
+
+  const { songs: localSongs, setSongs: setLocalSongs, isPrefetching } = usePrefetchSongs({
+    initialSongs: songs,
+    songIndex,
+    userId: userId ? Number(userId) : undefined,
+    status,
+    fetchMoreSongs,
+    prefetchFromEnd: 2, // 끝에서 2개 남으면
+    maxPrefetch: 2,
+  });
+
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLyricsListOpen, setIsLyricsListOpen] = useState(false);
-  const [songIndex, setSongIndex] = useState(0);
-  const [localSongs, setLocalSongs] = useState<Song[]>(songs)
   const song = localSongs[songIndex];
   const rawText = song?.lyric ?? "가사가 없습니다(디버깅용)";
   const text = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-  const { data: session, status } = useSession(); // authenticated / unauthenticated / loading
-  const userId = session?.user.user_id;
-  
 
   const postResultMutation = usePostTextResult();
   const postFavoriteMutation = usePostFavorite();
@@ -142,10 +171,14 @@ export function SongTypeBoard({ songs }: Props) {
       );
     }
   };
+    // useEffect(() => {
+    //   console.log("[render] localSongs len =", localSongs.length);
+    // }, [localSongs.length]);
+    // useEffect(() => {
+    //   console.log("[debug] canNext", canNext, "songIndex", songIndex, "len", localSongs.length);
+    // }, [canNext, songIndex, localSongs.length]);
 
-  useEffect(() => setLocalSongs(songs), [songs])
-  
-  useEffect(() => {
+    useEffect(() => {
     if (!isLyricsListOpen && pendingFocusRef.current) {
       pendingFocusRef.current = false;
   
@@ -293,6 +326,13 @@ export function SongTypeBoard({ songs }: Props) {
           activeIndex={songIndex}
           onSelectSong={selectSong}
          />
+         {isPrefetching && (
+            <div className="text-xs text-neutral-500 mt-2">다음 곡 불러오는 중...</div>
+          )}
+          <div className="text-xs text-neutral-500 mt-2">
+            total: {localSongs.length} / index: {songIndex} / canNext: {String(canNext)}
+          </div>
         </div>
+         
   );
 }
