@@ -13,10 +13,15 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
-      // 이미 user_id 있으면 유지
-      if ((token as any).user_id) return token;
+      // user_id + is_admin 이미 있으면 재요청 안 함
+      if (
+        (token as any).user_id != null &&
+        (token as any).is_admin != null
+      ) {
+        return token;
+      }
 
-      // 구글 로그인 콜백 시점에만 동기화
+      // 구글 로그인 콜백 시점
       if (account?.provider === "google") {
         if (!account.id_token) {
           console.error("google id_token missing");
@@ -37,12 +42,23 @@ export const authOptions: NextAuthOptions = {
           }),
         });
 
-        const data = await res.json();
-        console.log("✅ /auth/google response:", data);
+        const json = await res.json();
+        console.log("✅ /auth/google response:", json);
 
-        // 핵심: 서버 응답이 data.data.user_id 형태
-        const userId = data?.data?.user_id ?? data?.user_id;
+        const userId =
+          json?.data?.user_id ??
+          json?.user_id ??
+          null;
+
+        // 핵심: indinfo → is_admin 매핑
+        const isAdmin =
+          json?.data?.is_admin ??
+          json?.data?.indinfo ??
+          json?.is_admin ??
+          false;
+
         (token as any).user_id = userId;
+        (token as any).is_admin = isAdmin;
       }
 
       return token;
@@ -50,6 +66,7 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       (session.user as any).user_id = (token as any).user_id;
+      (session.user as any).is_admin = (token as any).is_admin ?? false;
       return session;
     },
   },

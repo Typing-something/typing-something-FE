@@ -17,7 +17,7 @@ export function NavLink({ href, children, external }: Props) {
     "relative text-xs font-medium text-neutral-700 hover:text-neutral-600 transition-colors";
 
   const content = (
-    <span className="inline-block w-[100px] text-left">
+    <span className="inline-block">
       {hovered ? (
         <DecryptedText
           text={children}

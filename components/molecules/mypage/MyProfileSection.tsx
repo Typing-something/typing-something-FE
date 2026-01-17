@@ -14,7 +14,7 @@ export function MyProfileSection({ me }: { me: Me }) {
 
   return (
     <>
-      <section className="mt-6 overflow-hidden border-neutral-200">
+      <section className="overflow-hidden border-neutral-200">
         {/* header */}
         <div className="p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
