@@ -142,7 +142,7 @@ export default async function MyPage() {
 
   return (
     <main className="min-h-screen bg-neutral-100">
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 mt-14">
+      <div className="mx-auto w-full max-w-6xl px-4 py-10 pt-24">
         {/* header */}
         {/* <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900">My Page</h1>
