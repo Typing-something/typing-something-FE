@@ -60,8 +60,8 @@ export function ResultModal({
 
         {/* stats */}
         <div className="grid grid-cols-3 divide-x divide-neutral-200 border-b border-neutral-200">
-          <StatCell label="CPM" value={result.cpm} />
           <StatCell label="WPM" value={result.wpm} />
+          <StatCell label="CPM" value={result.cpm} />
           <StatCell label="ACC" value={`${result.acc}%`} />
         </div>
         {/* text meta (UI only) */}
