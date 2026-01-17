@@ -33,14 +33,14 @@ export default async function LeaderboardPage() {
           {/* desktop layout */}
           <div
             className={[
-              "mt-6 grid gap-6",
+              "mt-14 grid gap-6",
               myRank ? "md:grid-cols-[320px_1fr]" : "md:grid-cols-1",
             ].join(" ")}
           >
             {/* left (desktop only) - 로그인 했을 때만 아예 렌더 */}
             {myRank && (
               <aside className="hidden md:block">
-                <div className="sticky top-[88px] mt-8">
+                <div className="sticky top-[88px]">
                   <MyRankSideCard me={myRank} />
                 </div>
               </aside>
@@ -48,9 +48,9 @@ export default async function LeaderboardPage() {
     
             {/* right */}
             <section className="min-w-0">
-              <div className="mt-6 border-b border-neutral-200">
+              <div className="border-b border-neutral-200">
                 <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-                  <div className="text-sm font-semibold text-neutral-900">
+                  <div className="text-xl font-semibold text-neutral-900">
                     Rankings
                   </div>
                   <div className="text-xs text-neutral-500">Updated just now</div>
