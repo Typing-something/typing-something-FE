@@ -15,7 +15,6 @@ export const TypingInput = forwardRef<HTMLTextAreaElement, TypingInputProps>(
     return (
       <textarea
         ref={ref}
-        // autoFocus
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onCompositionStart={onCompositionStart}
@@ -27,7 +26,17 @@ export const TypingInput = forwardRef<HTMLTextAreaElement, TypingInputProps>(
           onChange(value + "\n");
         }}
         spellCheck={false}
-        className="absolute left-0 top-0 w-px h-px opacity-0 pointer-events-none resize-none"
+        autoCapitalize="off"
+        autoCorrect="off"
+        autoComplete="off"
+        className="
+          absolute inset-0
+          w-full h-full
+          opacity-0
+          resize-none
+          outline-none
+          bg-transparent
+        "
       />
     );
   }
