@@ -259,6 +259,7 @@ export function SongTypeBoard({ songs }: Props) {
                 중앙: 타이핑 영역
             ======================= */}
             <TypingStage
+              key={song.songId}
               text={text}
               input={input}
               cursorIndex={cursorIndex}

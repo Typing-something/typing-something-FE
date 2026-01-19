@@ -28,26 +28,39 @@ export function TypingStage({
   const lines = splitLines(text);
 
   return (
-    <div
-      className="relative px-6 py-8 space-y-4 cursor-text"
-      onClick={onFocusRequest}
-    >
-      <TypingDisplay
-        lines={lines}
-        input={input}
-        cursorIndex={cursorIndex}
-        isComposing={isComposing}
-      />
-      <TypingInput
-        ref={inputRef}
-        value={input}
-        onChange={(v) => onChangeInput(normalizeInputLines(lines, v, 5))}
-        onCompositionStart={() => onComposingChange(true)}
-        onCompositionEnd={() => onComposingChange(false)}
-        isComposing={isComposing} 
-      />
-    </div>
-  );
+      <div
+        className="relative px-6 py-8 cursor-text"
+        onClick={onFocusRequest}
+      >
+        {/* 🎵 가사 뷰포트 */}
+        <div
+          className="relative overflow-hidden h-[170px] py-[30px] bg-neutral-100"
+          style={{
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
+            maskImage:
+              "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
+          }}
+        >          
+          <TypingDisplay
+            lines={lines}
+            input={input}
+            cursorIndex={cursorIndex}
+            isComposing={isComposing}
+          />
+        </div>
+
+        {/* ⌨️ 투명 입력 레이어 */}
+        <TypingInput
+          ref={inputRef}
+          value={input}
+          onChange={(v) => onChangeInput(normalizeInputLines(lines, v, 5))}
+          onCompositionStart={() => onComposingChange(true)}
+          onCompositionEnd={() => onComposingChange(false)}
+          isComposing={isComposing}
+        />
+      </div>  
+    );
 }
 
 function splitLines(text: string) {
