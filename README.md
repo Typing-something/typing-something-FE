@@ -1,37 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TypeSomething
 
-## Getting Started
+> 노래 가사 타이핑 웹
 
-First, run the development server:
+[배포 링크](https://typesomething.vercel.app)
+
+## 프로젝트 소개
+
+TypeSomething은 음악 가사를 타이핑하는 방식으로
+타자 연습을 할 수 있는 웹 애플리케이션입니다.
+
+사용자는 가사를 따라 입력하며 자신의 타이핑 속도와 정확도를
+확인할 수 있습니다.
+
+## 스크린샷
+
+| 화면1 | 화면2 |
+|-------|-------|
+| ![screenshot1]() | ![screenshot2]() |
+
+## 주요 기능
+
+- 랜덤 곡 기반 타이핑 진행
+  - 곡을 10개씩 랜덤으로 불러와 타이핑 리스트를 구성
+  - 8번째 곡을 타이핑 중일 경우, 새로운 랜덤 곡 10개를 추가로 불러와
+    리스트에 자연스럽게 이어서 제공
+  - 사용자가 타이핑을 멈추지 않고 이어서 진행할 수 있도록 흐름을 고려해 설계
+
+- 실시간 타이핑 지표 제공
+  - 입력 중 타이핑 속도(WPM, CPM)와 정확도를 실시간으로 확인
+  - 타이핑 종료 후에는 결과를 모달로 분리해
+    입력 과정과 결과 확인 경험을 명확히 구분
+
+- 결과 기록 처리
+  - 로그인 여부에 따라 결과 저장 책임을 분리
+  - 로그인한 사용자의 경우 타이핑 결과를 서버에 저장
+  - 비로그인 사용자는 결과를 모달에서 즉시 확인 가능
+
+- 곡 좋아요 기능
+  - 곡에 좋아요를 눌러 관심 곡으로 표시
+
+- 리더보드(랭킹) 조회
+  - 사용자들의 타이핑 기록을 기반으로 한 랭킹 확인 가능
+
+- 마이페이지
+  - 내가 타이핑한 곡 목록 조회
+  - 개인 타이핑 기록 확인
+
+## 기술 스택
+
+| 분류 | 기술 |
+|------|------|
+| Frontend | Next.js, React, Zustand, TanStack Query, Motion, Tailwind CSS |
+| Backend | - |
+| Database | - |
+| Infra | Vercel |
+
+## 아키텍처
+
+(다이어그램 또는 설명)
+
+## 실행 방법
 
 ```bash
+# 설치
+npm install
+
+# 개발 서버 실행
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 환경 변수
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| 변수명 | 설명 |
+|--------|------|
+| `EXAMPLE_KEY` | 설명 |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 팀원
 
-## Learn More
+| 이름 | 역할 | GitHub |
+|------|------|--------|
+| 권민성 | Frontend / Deployment | https://github.com/msms804 |
+| 조정민 | Backend / DB / Infra | https://github.com/JOJoungMin |
 
-To learn more about Next.js, take a look at the following resources:
+## 관련 링크
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# typing-something-FE
+- [Backend Repository]()
+- [Figma]()
