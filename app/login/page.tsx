@@ -2,7 +2,16 @@
 
 import { signIn } from "next-auth/react";
 import { toast } from "react-toastify";
+import { useEffect } from "react";
+
 export default function LoginPageUI() {
+
+  useEffect(() => {
+    return () => {
+      toast.dismiss();
+    }
+  }, [])
+  
   return (
     <main className="min-h-screen bg-neutral-100 px-8 py-32">
       {/* 전체 레이아웃 */}
