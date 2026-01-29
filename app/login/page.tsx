@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { toast } from "react-toastify";
 export default function LoginPageUI() {
   return (
     <main className="min-h-screen bg-neutral-100 px-8 py-32">
@@ -71,15 +72,24 @@ export default function LoginPageUI() {
             <button
               type="button"
               onClick={() => signIn("google", { callbackUrl: "/" })}
-              className="h-14 w-full bg-white text-sm font-semibold text-neutral-900 border border-neutral-300 shadow-sm hover:bg-neutral-50 active:bg-neutral-100"
+              className="flex h-14 w-full items-center justify-center gap-3 bg-white text-sm font-semibold text-neutral-900 border border-neutral-300 shadow-sm hover:bg-neutral-50 active:bg-neutral-100"
             >
+              <img src="/googleImg.png" alt="Google" className="h-5 w-5" />
               Continue with Google
             </button>
 
             {/* 기존 버튼은 “UI만” 남기거나 지워도 됨 */}
             <button
               type="button"
-              className="h-14 w-full bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 text-sm font-semibold tracking-wide text-white shadow-[0_14px_40px_-16px_rgba(0,0,0,0.65)] hover:brightness-110 active:brightness-95"
+              onClick={() =>
+                toast.info("이메일 로그인은 곧 추가될 예정이에요", {
+                  toastId: "email-login-soon",
+                })
+              }
+              className="h-14 w-full bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950
+                        text-sm font-semibold tracking-wide text-white
+                        shadow-[0_14px_40px_-16px_rgba(0,0,0,0.65)]
+                        hover:brightness-110 active:brightness-95"
             >
               LOGIN
             </button>
