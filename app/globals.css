@@ -75,3 +75,11 @@ body {
     opacity: 0;
   }
 }
+
+/* ===============================
+   React Toastify Custom Styles
+   =============================== */
+.Toastify__spinner {
+  border-color: #fb4058 !important;
+  border-right-color: transparent !important;
+}
