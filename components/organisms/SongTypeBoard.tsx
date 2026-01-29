@@ -15,6 +15,7 @@ import { useSession } from "next-auth/react";
 import { usePostTextResult } from "@/query/usePostTextResult";
 import { usePostFavorite } from "@/query/usePostFavorite";
 import { usePrefetchSongs } from "@/hooks/usePrefetchSongs";
+import { toast } from "react-toastify";
 
 type Props = {
   songs: Song[];
@@ -196,6 +197,44 @@ export function SongTypeBoard({ songs }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songIndex]);
 
+  // 다음 곡 불러오는 중 토스트 (최소 1.5초 표시)
+  const toastShownAtRef = useRef<number | null>(null);
+  const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const TOAST_ID = "prefetching-toast";
+  const MIN_DISPLAY_MS = 1500;
+
+  useEffect(() => {
+    if (isPrefetching) {
+      // 기존 타이머가 있으면 취소
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+        dismissTimerRef.current = null;
+      }
+      toastShownAtRef.current = Date.now();
+      toast.loading("다음 곡 불러오는 중...", { toastId: TOAST_ID });
+    } else if (toastShownAtRef.current !== null) {
+      const elapsed = Date.now() - toastShownAtRef.current;
+      const remaining = Math.max(0, MIN_DISPLAY_MS - elapsed);
+
+      dismissTimerRef.current = setTimeout(() => {
+        toast.dismiss(TOAST_ID);
+        dismissTimerRef.current = null;
+      }, remaining);
+
+      toastShownAtRef.current = null;
+    }
+  }, [isPrefetching]);
+
+  // 컴포넌트 언마운트 시에만 정리
+  useEffect(() => {
+    return () => {
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+      }
+      toast.dismiss(TOAST_ID);
+    };
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
@@ -327,9 +366,6 @@ export function SongTypeBoard({ songs }: Props) {
           activeIndex={songIndex}
           onSelectSong={selectSong}
          />
-         {isPrefetching && (
-            <div className="text-xs text-neutral-500 mt-2">다음 곡 불러오는 중...</div>
-          )}
           {/* <div className="text-xs text-neutral-500 mt-2">
             total: {localSongs.length} / index: {songIndex} / canNext: {String(canNext)}
           </div> */}
