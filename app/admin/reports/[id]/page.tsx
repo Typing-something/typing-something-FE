@@ -1,14 +1,16 @@
-// app/admin/page.tsx
+// app/admin/reports/[id]/page.tsx
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/authOption";
+import { authOptions } from "../../../api/auth/[...nextauth]/authOption";
 import { redirect } from "next/navigation";
-import { getReports } from "@/lib/api/report";
-import type { ReportSummary } from "@/types/report";
+import { getReportDetail } from "@/lib/api/report";
 import Link from "next/link";
-import { ReportTable } from "@/components/organisms/ReportTable";
-import { PerformanceTrendChart } from "@/components/organisms/PerformanceTrendChart";
+import { ReportDetailContent } from "./ReportDetailContent";
 
-export default async function AdminPage() {
+export default async function ReportDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   // 관리자 권한 체크
   const session = await getServerSession(authOptions);
   const isAdmin = Boolean((session?.user as any)?.is_admin);
@@ -17,11 +19,12 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  let reports: ReportSummary[] = [];
+  const { id } = await params;
+  let reportDetail = null;
   let error: string | null = null;
 
   try {
-    reports = await getReports();
+    reportDetail = await getReportDetail(Number(id));
   } catch (e: any) {
     error = e.message || "리포트를 불러오는데 실패했습니다.";
   }
@@ -38,22 +41,44 @@ export default async function AdminPage() {
         {/* 메인 콘텐츠 영역 */}
         <main className="flex-1 ml-[140px] min-h-screen">
           <div className="p-6">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-neutral-100">Report Dashboard</h1>
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <Link
+                  href="/admin"
+                  className="text-sm text-neutral-400 hover:text-neutral-300 mb-2 inline-block"
+                >
+                  ← 대시보드로 돌아가기
+                </Link>
+                <h1 className="text-2xl font-bold text-neutral-100">
+                  리포트 #{id} 상세
+                </h1>
+                {reportDetail && (
+                  <p className="mt-1 text-sm text-neutral-400">
+                    {reportDetail.report_info.date} • 커밋:{" "}
+                    {reportDetail.report_info.commit ? (
+                      <a
+                        href={`https://github.com/Typing-something/Flask_Api_Server/commit/${reportDetail.report_info.commit}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 hover:underline"
+                      >
+                        {reportDetail.report_info.commit.substring(0, 7)}
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </p>
+                )}
+              </div>
             </div>
 
             {error ? (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+              <div className="border border-red-700 bg-red-900/10 px-4 py-3 text-sm text-red-400">
                 ❌ {error}
               </div>
-            ) : (
-              <>
-                <PerformanceTrendChart reports={reports} />
-                <div className="mt-6">
-                  <DashboardContent reports={reports} />
-                </div>
-              </>
-            )}
+            ) : reportDetail ? (
+              <ReportDetailContent report={reportDetail} />
+            ) : null}
           </div>
         </main>
       </div>
@@ -110,8 +135,5 @@ function AdminSidebar() {
   );
 }
 
-// 대시보드 콘텐츠 컴포넌트 (클라이언트 컴포넌트로 변경 필요)
-function DashboardContent({ reports }: { reports: ReportSummary[] }) {
-  return <ReportTable reports={reports} />;
-}
+
 
