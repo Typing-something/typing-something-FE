@@ -1,7 +1,7 @@
 // app/leaderboard/page.tsx
 import { getRanking } from "@/lib/api/ranking";
-import { Row } from "@/components/organisms/LeaderboardRow";
 import MyRankSideCardClient from "@/components/organisms/MyRankSideCardClient";
+import LeaderboardList from "@/components/organisms/LeaderboardList";
 
 export const revalidate = 600;
 
@@ -29,7 +29,7 @@ export default async function LeaderboardPage() {
           <section className="min-w-0">
             <div className="border-b border-neutral-200">
               <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-                <div className="text-xl font-semibold text-neutral-900">
+                <div className="text-3xl font-semibold text-neutral-900">
                   Rankings
                 </div>
                 <div className="text-xs text-neutral-500">
@@ -39,11 +39,19 @@ export default async function LeaderboardPage() {
                 </div>
               </div>
 
-              <ul className="divide-y divide-neutral-200">
-                {ranking.map((u) => (
-                  <Row key={u.userId} u={u} highlight={false} />
-                ))}
-              </ul>
+              <div className="sticky top-0 z-10 flex items-center gap-4 border-b border-neutral-200 bg-neutral-100 px-5 py-3 text-xs font-semibold text-neutral-500">
+                <div className="w-10 text-center">#</div>
+                <div className="h-10 w-10" />
+                <div className="min-w-0 flex-1">Name</div>
+                <div className="hidden sm:flex items-center gap-2">
+                  <div className="w-[72px] text-center">WPM</div>
+                  <div className="w-[72px] text-center">ACC</div>
+                  {/* TODO: 콤보 구현 후 주석 해제 */}
+                  {/* <div className="w-[72px] text-center">Combo</div> */}
+                </div>
+              </div>
+
+              <LeaderboardList ranking={ranking} />
             </div>
           </section>
         </div>
