@@ -14,5 +14,11 @@ export default function MyRankSideCardClient({ ranking }: { ranking: Leader[] })
   const me = ranking.find((u) => u.userId === userId);
   if (!me) return null;
 
-  return <MyRankSideCard me={me} />;
+  return (
+    <aside className="hidden md:block w-[320px] shrink-0">
+      <div className="sticky top-[88px]">
+        <MyRankSideCard me={me} />
+      </div>
+    </aside>
+  );
 }

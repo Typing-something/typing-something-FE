@@ -18,17 +18,12 @@ export default async function LeaderboardPage() {
   return (
     <main className="min-h-screen bg-neutral-100">
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
-        <div className="mt-14 grid gap-6 md:grid-cols-[320px_1fr]">
-          {/* 왼쪽: 클라에서만 결정 */}
-          <aside className="hidden md:block">
-            <div className="sticky top-[88px]">
-              <MyRankSideCardClient ranking={ranking} />
-            </div>
-          </aside>
+        <div className="mt-14 flex justify-center gap-6">
+          <MyRankSideCardClient ranking={ranking} />
 
-          <section className="min-w-0">
+          <section className="min-w-0 max-w-4xl flex-1">
             <div className="border-b border-neutral-200">
-              <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+              <div className="flex items-center justify-between px-5 py-4">
                 <div className="text-3xl font-semibold text-neutral-900">
                   Rankings
                 </div>
@@ -38,6 +33,8 @@ export default async function LeaderboardPage() {
                   <span>최근 갱신: {updatedAt}</span>
                 </div>
               </div>
+
+              <div className="mt-1" />
 
               <div className="sticky top-0 z-10 flex items-center gap-4 border-b border-neutral-200 bg-neutral-100 px-5 py-3 text-xs font-semibold text-neutral-500">
                 <div className="w-10 text-center">#</div>

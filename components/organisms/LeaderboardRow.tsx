@@ -47,10 +47,10 @@ export function Row({ u, highlight }: { u: Leader; highlight?: boolean }) {
         </div>
   
         <div className="hidden sm:flex items-center gap-2">
-          <div className="w-[72px] rounded-xl border border-neutral-200 bg-white px-3 py-2 text-center text-xs font-semibold tabular-nums text-neutral-800">
+          <div className="w-[72px] px-3 py-2 text-center text-xs font-semibold tabular-nums text-neutral-800">
             {u.wpm}
           </div>
-          <div className="w-[72px] rounded-xl border border-neutral-200 bg-white px-3 py-2 text-center text-xs font-semibold tabular-nums text-neutral-800">
+          <div className="w-[72px] px-3 py-2 text-center text-xs font-semibold tabular-nums text-neutral-800">
             {u.accuracy.toFixed(1)}%
           </div>
           {/* TODO: 콤보 구현 후 주석 해제 */}
