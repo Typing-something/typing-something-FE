@@ -1,74 +1,53 @@
 // app/leaderboard/page.tsx
-import { MyRankSideCard } from "@/components/organisms/MyRankSideCard";
-import { authOptions } from "../api/auth/[...nextauth]/authOption";
-import { getServerSession } from "next-auth";
-import { getMe } from "@/lib/api/user";
 import { getRanking } from "@/lib/api/ranking";
-import { Leader } from "@/types/leaderboard";
 import { Row } from "@/components/organisms/LeaderboardRow";
+import MyRankSideCardClient from "@/components/organisms/MyRankSideCardClient";
+
+export const revalidate = 600;
 
 export default async function LeaderboardPage() {
-  const ranking = await getRanking(); // 로그인 여부와 무관
-  
-  const session = await getServerSession(authOptions);
-  
-    const userId = (session?.user as any)?.user_id;
-    const me = userId ? await getMe(Number(userId)) : null;
-  
-    const myRank: Leader | null = me 
-    ? {
-      userId: me.userId ?? null,
-      rank: me.ranking_score ?? 0,
-      name: me.name,
-      handle: me.handle,
-      imageUrl: me.image ?? "imsi",
-      wpm: me.avg_wpm ?? 0,
-      accuracy: me.avg_accuracy ?? 0,
-      combo: me.max_combo ?? 0,
-    }
-    : null;
-    return (
-      <main className="min-h-screen bg-neutral-100">
-        <div className="mx-auto w-full max-w-6xl px-4 py-10">
-          {/* desktop layout */}
-          <div
-            className={[
-              "mt-14 grid gap-6",
-              myRank ? "md:grid-cols-[320px_1fr]" : "md:grid-cols-1",
-            ].join(" ")}
-          >
-            {/* left (desktop only) - 로그인 했을 때만 아예 렌더 */}
-            {myRank && (
-              <aside className="hidden md:block">
-                <div className="sticky top-[88px]">
-                  <MyRankSideCard me={myRank} />
+  const ranking = await getRanking();
+
+  const updatedAt = new Date().toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Seoul",
+  });
+
+  return (
+    <main className="min-h-screen bg-neutral-100">
+      <div className="mx-auto w-full max-w-6xl px-4 py-10">
+        <div className="mt-14 grid gap-6 md:grid-cols-[320px_1fr]">
+          {/* 왼쪽: 클라에서만 결정 */}
+          <aside className="hidden md:block">
+            <div className="sticky top-[88px]">
+              <MyRankSideCardClient ranking={ranking} />
+            </div>
+          </aside>
+
+          <section className="min-w-0">
+            <div className="border-b border-neutral-200">
+              <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+                <div className="text-xl font-semibold text-neutral-900">
+                  Rankings
                 </div>
-              </aside>
-            )}
-    
-            {/* right */}
-            <section className="min-w-0">
-              <div className="border-b border-neutral-200">
-                <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-                  <div className="text-xl font-semibold text-neutral-900">
-                    Rankings
-                  </div>
-                  <div className="text-xs text-neutral-500">Updated just now</div>
+                <div className="text-xs text-neutral-500">
+                  <span>랭킹은 10분마다 갱신됩니다</span>
+                  <span className="mx-1">·</span>
+                  <span>최근 갱신: {updatedAt}</span>
                 </div>
-    
-                <ul className="divide-y divide-neutral-200">
-                  {ranking.map((u) => (
-                    <Row
-                      key={u.rank}
-                      u={u}
-                      highlight={u.userId === (myRank?.userId ?? -1)}
-                    />
-                  ))}
-                </ul>
               </div>
-            </section>
-          </div>
+
+              <ul className="divide-y divide-neutral-200">
+                {ranking.map((u) => (
+                  <Row key={u.userId} u={u} highlight={false} />
+                ))}
+              </ul>
+            </div>
+          </section>
         </div>
-      </main>
-    );
+      </div>
+    </main>
+  );
 }
