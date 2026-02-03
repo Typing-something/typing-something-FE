@@ -1,5 +1,5 @@
-import { Avatar } from "../atoms/mypage/Avatar";
 import { Leader } from "@/types/leaderboard";
+import { ProfileAvatar } from "@/components/atoms/ProfileAvatar";
 
 export function MyRankSideCard({ me }: { me: Leader }) {
     return (
@@ -12,19 +12,7 @@ export function MyRankSideCard({ me }: { me: Leader }) {
         </div>
   
         <div className="mt-4 flex items-center gap-3">
-        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full">
-            {me.imageUrl ? (
-                <img
-                  src={me.imageUrl}
-                  alt={me.name}
-                  className="h-full w-full object-cover"
-                />
-            ) : (
-                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-neutral-500">
-                        {me.name[0]}
-                    </div>
-                ) }          
-            </div>
+        <ProfileAvatar src={me.imageUrl} alt={me.name} size="h-12 w-12" />
           <div className="min-w-0">
             <div className="truncate text-base font-semibold text-neutral-900">{me.name}</div>
             <div className="truncate text-sm text-neutral-500">{me.handle}</div>

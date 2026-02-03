@@ -23,7 +23,7 @@ export async function getRanking(): Promise<Leader[]> {
     const userId = item.account.user_id;
     const name = item.account.username;
     const handle = `@user${item.account.user_id}`; // 서버에 handle 없으니 일단 이렇게
-    const imageUrl = item.account.profile_pic || "imsi";
+    const imageUrl = item.account.profile_pic || "/profileNullImg.webp";
 
     return {
       userId,
