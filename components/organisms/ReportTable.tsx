@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { ReportSummary } from "@/types/report";
 
 type Props = {
@@ -45,10 +46,21 @@ function CommitGroup({
   commit: string;
   reports: ReportSummary[];
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   const commitShort = commit !== "unknown" ? commit.substring(0, 7) : "N/A";
   const commitUrl = commit !== "unknown"
     ? `https://github.com/Typing-something/Flask_Api_Server/commit/${commit}`
     : null;
+
+  // 리포트를 최신순으로 정렬 (test_time 기준)
+  const sortedReports = [...reports].sort((a, b) => 
+    b.test_time.localeCompare(a.test_time)
+  );
+
+  // 기본적으로 최신 5개만 표시, 확장 시 모두 표시
+  const visibleReports = isExpanded ? sortedReports : sortedReports.slice(0, 5);
+  const hasMore = sortedReports.length > 5;
 
   return (
     <div className="bg-neutral-800 border border-neutral-700 overflow-hidden">
@@ -97,12 +109,24 @@ function CommitGroup({
             </tr>
           </thead>
           <tbody className="bg-neutral-800 divide-y divide-neutral-700">
-            {reports.map((report) => (
+            {visibleReports.map((report) => (
               <ReportTableRow key={report.report_id} report={report} />
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* 기록 펼쳐보기 버튼 */}
+      {hasMore && (
+        <div className="bg-neutral-700/50 px-3 py-2 border-t border-neutral-600">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-xs text-neutral-300 hover:text-neutral-100 transition-colors"
+          >
+            {isExpanded ? "기록 접기" : `기록 펼쳐보기 (${sortedReports.length - 5}개 더 보기)`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

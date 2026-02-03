@@ -2,7 +2,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../api/auth/[...nextauth]/authOption";
 import { redirect } from "next/navigation";
-import { getReportDetail } from "@/lib/api/report";
+import { getReportDetail, getReports } from "@/lib/api/report";
 import Link from "next/link";
 import { ReportDetailContent } from "./ReportDetailContent";
 
@@ -29,6 +29,17 @@ export default async function ReportDetailPage({
     error = e.message || "리포트를 불러오는데 실패했습니다.";
   }
 
+  // 최신 리포트 ID 계산
+  let latestReportId: number | null = null;
+  try {
+    const reports = await getReports();
+    if (reports.length > 0) {
+      latestReportId = Math.max(...reports.map(r => r.report_id));
+    }
+  } catch (e) {
+    // 리포트 가져오기 실패해도 계속 진행
+  }
+
   return (
     <div className="min-h-screen bg-neutral-900">
       {/* 상단 헤더와 경계선 */}
@@ -36,7 +47,7 @@ export default async function ReportDetailPage({
       
       <div className="flex pt-14">
         {/* 좌측 사이드바 */}
-        <AdminSidebar />
+        <AdminSidebar latestReportId={latestReportId} />
         
         {/* 메인 콘텐츠 영역 */}
         <main className="flex-1 ml-[140px] min-h-screen">
@@ -87,10 +98,10 @@ export default async function ReportDetailPage({
 }
 
 // 좌측 사이드바 컴포넌트
-function AdminSidebar() {
+function AdminSidebar({ latestReportId }: { latestReportId: number | null }) {
   const menuItems = [
     { href: "/admin", label: "대시보드" },
-    { href: "/admin/reports", label: "성능 리포트" },
+    { href: latestReportId ? `/admin/reports/${latestReportId}` : "/admin/reports", label: "성능 리포트" },
     { href: "/admin/users", label: "사용자 관리" },
     { href: "/admin/system", label: "시스템 설정" },
     { href: "/admin/logs", label: "로그" },

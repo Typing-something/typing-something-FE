@@ -122,6 +122,22 @@ export function PerformanceTrendChart({ reports }: Props) {
   // 커밋별 색상 매핑 (같은 커밋은 같은 색상)
   const commitColors: Record<string, string> = {};
   const uniqueCommits = Array.from(new Set(trendData.map(d => d.commit))).filter(Boolean);
+  
+  // 커밋별로 그룹화하고 각 커밋의 가장 최신 리포트 시간 기준으로 정렬
+  const commitsWithLatestTime = uniqueCommits.map(commit => {
+    const commitData = trendData.filter(d => d.commit === commit);
+    const latestTime = commitData.reduce((latest, current) => 
+      current.date > latest ? current.date : latest, commitData[0].date
+    );
+    return { commit, latestTime };
+  });
+  
+  // 최신순으로 정렬하고 최신 5개만 선택
+  const latest5Commits = commitsWithLatestTime
+    .sort((a, b) => b.latestTime.localeCompare(a.latestTime))
+    .slice(0, 5)
+    .map(item => item.commit);
+  
   const colors = [
     "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
     "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1"
@@ -130,8 +146,21 @@ export function PerformanceTrendChart({ reports }: Props) {
     commitColors[commit] = colors[idx % colors.length];
   });
 
-  // 각 리포트별 데이터 준비
-  const chartData = trendData.map((data) => ({
+  // 각 커밋별로 최신 리포트 8개씩 선택 (총 40개 데이터)
+  const selectedData: TrendData[] = [];
+  latest5Commits.forEach(commit => {
+    const commitData = trendData
+      .filter(d => d.commit === commit)
+      .sort((a, b) => b.date.localeCompare(a.date)) // 최신순 정렬
+      .slice(0, 8); // 최신 8개만 선택
+    selectedData.push(...commitData);
+  });
+  
+  // 리포트 ID 순으로 정렬 (그래프에서 시간순으로 보이도록)
+  selectedData.sort((a, b) => a.reportId - b.reportId);
+  
+  // 각 리포트별 데이터 준비 (최신 커밋 5개 × 각 8개 기록 = 총 40개)
+  const chartData = selectedData.map((data) => ({
     reportId: data.reportId,
     reportLabel: `#${data.reportId}`,
     commit: data.commitShort,
@@ -144,8 +173,8 @@ export function PerformanceTrendChart({ reports }: Props) {
   }));
 
 
-  // 커밋별 범례 데이터
-  const commitLegend = uniqueCommits.map(commit => ({
+  // 커밋별 범례 데이터 (최신 5개만 표시)
+  const commitLegend = latest5Commits.map(commit => ({
     commit: commit.substring(0, 7),
     color: commitColors[commit],
     count: trendData.filter(d => d.commit === commit).length,
@@ -157,6 +186,18 @@ export function PerformanceTrendChart({ reports }: Props) {
         API 성능 추이 (메인 페이지 로드 API)
       </h3>
       
+      {/* P99, 평균 범례 */}
+      <div className="mb-4 flex flex-wrap gap-4 text-xs">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded bg-red-500"></div>
+          <span className="text-neutral-300">P99 (최악의 케이스) (ms)</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded bg-blue-500"></div>
+          <span className="text-neutral-300">평균 (ms)</span>
+        </div>
+      </div>
+
       {/* 커밋별 범례 */}
       <div className="mb-4 flex flex-wrap gap-3 text-xs">
         {commitLegend.map((item) => (
@@ -177,6 +218,7 @@ export function PerformanceTrendChart({ reports }: Props) {
           <XAxis
             dataKey="reportLabel"
             tick={{ fill: "#9ca3af", fontSize: 10 }}
+            tickFormatter={(value) => value} // 리포트 ID만 표시
           />
           <YAxis 
             tick={{ fill: "#9ca3af", fontSize: 10 }}
@@ -215,7 +257,6 @@ export function PerformanceTrendChart({ reports }: Props) {
               return null;
             }}
           />
-          <Legend />
           <Line
             type="monotone"
             dataKey="avg"
@@ -258,6 +299,50 @@ export function PerformanceTrendChart({ reports }: Props) {
           />
         </LineChart>
       </ResponsiveContainer>
+
+      {/* X축 아래 커밋 정보 표시 (각 커밋별 최신 1개만, 그래프 순서에 맞춰) */}
+      <div className="mt-2 flex justify-around gap-1 text-xs">
+        {latest5Commits
+          .map((commit) => {
+            // 각 커밋별로 가장 최신 리포트 찾기
+            const commitData = chartData
+              .filter(d => d.fullCommit === commit)
+              .sort((a, b) => b.reportId - a.reportId)[0]; // 최신 리포트 1개만
+            
+            if (!commitData) return null;
+            
+            return { commit, commitData };
+          })
+          .filter((item): item is { commit: string; commitData: typeof chartData[0] } => item !== null)
+          .sort((a, b) => a.commitData.reportId - b.commitData.reportId) // 리포트 ID 순으로 정렬
+          .map(({ commit, commitData }) => {
+            const commitUrl = commitData.fullCommit && commitData.fullCommit !== 'unknown'
+              ? `https://github.com/Typing-something/Flask_Api_Server/commit/${commitData.fullCommit}`
+              : null;
+            
+            return (
+              <div key={commit} className="flex flex-col items-center gap-0.5 min-w-[60px]">
+                <div 
+                  className="w-2 h-2 rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                  style={{ backgroundColor: commitColors[commit] || "#3b82f6" }}
+                  title={commitData.commit}
+                ></div>
+                {commitUrl ? (
+                  <a
+                    href={commitUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neutral-400 hover:text-blue-400 hover:underline font-mono text-[10px] transition-colors"
+                  >
+                    {commitData.commit}
+                  </a>
+                ) : (
+                  <span className="text-neutral-400 font-mono text-[10px]">{commitData.commit}</span>
+                )}
+              </div>
+            );
+          })}
+      </div>
     </div>
   );
 }

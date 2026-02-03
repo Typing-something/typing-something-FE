@@ -50,6 +50,7 @@ export default function AdminLogsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedGithubVersion, setSelectedGithubVersion] = useState<string>('all');
   const [githubVersions, setGithubVersions] = useState<string[]>([]);
+  const [latestReportId, setLatestReportId] = useState<number | null>(null);
 
   // Authorization Effect
   useEffect(() => {
@@ -67,6 +68,22 @@ export default function AdminLogsPage() {
       async function fetchAllData() {
         setLoading(true);
         try {
+          // 최신 리포트 ID 가져오기
+          try {
+            const reportsRes = await fetch('/api/admin/reports');
+            if (reportsRes.ok) {
+              const reportsJson = await reportsRes.json();
+              if (reportsJson.success && reportsJson.data && reportsJson.data.length > 0) {
+                const reports = reportsJson.data;
+                const latestId = Math.max(...reports.map((r: any) => r.report_id));
+                setLatestReportId(latestId);
+              }
+            }
+          } catch (e) {
+            // 리포트 가져오기 실패해도 계속 진행
+            console.error("Failed to fetch latest report ID:", e);
+          }
+
           const [serverRes, frontendRes, uxRes] = await Promise.all([
             fetch('/api/admin/performance-logs'),
             fetch('/api/frontend-vitals'),
@@ -157,7 +174,7 @@ export default function AdminLogsPage() {
       
       <div className="flex pt-14">
         {/* 좌측 사이드바 */}
-        <AdminSidebar />
+        <AdminSidebar latestReportId={latestReportId} />
         
         {/* 메인 콘텐츠 영역 */}
         <main className="flex-1 ml-[140px] min-h-screen">
@@ -329,10 +346,10 @@ export default function AdminLogsPage() {
 }
 
 // 좌측 사이드바 컴포넌트
-function AdminSidebar() {
+function AdminSidebar({ latestReportId }: { latestReportId: number | null }) {
   const menuItems = [
     { href: "/admin", label: "대시보드" },
-    { href: "/admin/reports", label: "성능 리포트" },
+    { href: latestReportId ? `/admin/reports/${latestReportId}` : "/admin/reports", label: "성능 리포트" },
     { href: "/admin/users", label: "사용자 관리" },
     { href: "/admin/system", label: "시스템 설정" },
     { href: "/admin/logs", label: "로그" },
@@ -376,5 +393,6 @@ function AdminSidebar() {
     </aside>
   );
 }
+
 
 
