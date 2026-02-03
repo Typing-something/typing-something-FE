@@ -1,4 +1,5 @@
 import { Leader } from "@/types/leaderboard";
+import { ProfileAvatar } from "@/components/atoms/ProfileAvatar";
 export function Row({ u, highlight }: { u: Leader; highlight?: boolean }) {
     return (
       <li
@@ -19,18 +20,7 @@ export function Row({ u, highlight }: { u: Leader; highlight?: boolean }) {
           {u.rank}
         </div>
   
-        <div
-          className={[
-            "relative h-10 w-10 overflow-hidden rounded-full border",
-            highlight
-              ? "border-[#fb4058]/30 bg-white"
-              : "border-neutral-200 bg-neutral-100",
-          ].join(" ")}
-        >
-          <div className="absolute inset-0 grid place-items-center text-xs font-semibold text-neutral-600">
-            <img src={u.imageUrl} alt={u.handle}/>
-          </div>
-        </div>
+        <ProfileAvatar src={u.imageUrl} alt={u.handle} />
   
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 truncate text-sm font-semibold text-neutral-900">

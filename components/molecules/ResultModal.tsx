@@ -2,7 +2,7 @@
 
 import { IconButton } from "../atoms/IconButton";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
+import { ProfileAvatar } from "@/components/atoms/ProfileAvatar";
 type Result = { wpm: number; cpm: number; acc: number };
 type SongMeta = {
   songId: number;
@@ -104,17 +104,7 @@ export function ResultModal({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* avatar (ui only) */}
-              <div className="h-9 w-9 overflow-hidden rounded-full bg-neutral-200">
-                {me?.image ? (
-                  <Image
-                    src={me.image}
-                    alt="avatar"
-                    width={36}
-                    height={36}
-                    className="h-full w-full object-cover"
-                  />
-                ) : null}
-              </div>
+              <ProfileAvatar src={me?.image ?? null} alt={me?.name ?? "avatar"} size="h-9 w-9" />
               <div className="leading-tight">
                 <div className="text-sm font-semibold text-neutral-900">
                   {isLoggedIn ? (me?.name ?? "Unknown") : "Guest"}
