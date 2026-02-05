@@ -55,7 +55,7 @@ export function SongTypeBoard({ songs }: Props) {
     status,
     fetchMoreSongs,
     prefetchFromEnd: 2, // 끝에서 2개 남으면
-    maxPrefetch: 2,
+    maxPrefetch: 12,
   });
 
   const [input, setInput] = useState("");
