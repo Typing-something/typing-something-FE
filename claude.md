@@ -138,3 +138,108 @@ Examples:
 - Did I change unrelated code?
 - Did I match existing code style/patterns?
 - Is the diff reviewable?
+
+# Claude Code – Testing Workflow Rules
+
+## 📌 Mandatory Workflow for Test Tasks
+
+Whenever working on **test code**, you MUST strictly follow this process:
+
+---
+
+### 1. Branching
+
+- Create a **dedicated branch per test task**
+- Branch name format:
+  - `test/<target>`
+  - `test/<target>-<scenario>`
+- Examples:
+  - `test/parseTypingLine`
+  - `test/useLiveTypingMetrics-accuracy`
+- Never write or modify tests on `main` or `develop`.
+
+---
+
+### 2. Read the Testing Guide
+
+- Always read `TESTING_GUIDE.md` **before** writing tests.
+- Follow its philosophy, naming conventions, and structure.
+- Do NOT invent new testing styles.
+
+---
+
+### 3. Write Tests
+
+- Tests must clearly explain:
+  - What behavior is being verified
+  - What bug or regression the test prevents
+- Prefer readable and intention-revealing test names.
+
+---
+
+### 4. Run Tests
+
+- Run tests locally:
+  - `npm test` / `pnpm test`
+- Do NOT assume tests pass without running them.
+
+---
+
+### 5. Handle Failures
+
+- If any test FAILS:
+  - Do NOT commit.
+  - Analyze whether:
+    - The test expectation is incorrect, or
+    - There is a bug in the implementation.
+  - Fix the issue.
+  - Re-run tests until all tests PASS.
+- If expected behavior is unclear, STOP and ask the user.
+
+⚠️ STRICT RULES
+- Never commit failing tests.
+- Never skip or comment out tests.
+- Never use `.only`, `.skip`, or equivalents.
+
+---
+
+### 6. Commit & Push
+
+- Commit **only after all tests pass**
+- Commit message format:
+  - `test: add tests for <target>`
+- Push the branch after commit.
+
+---
+
+### 7. Cleanup (Post-Merge)
+
+- Branch cleanup MUST be done **after merge**.
+- Claude MUST NOT delete branches automatically.
+- After pushing the test branch, Claude should:
+
+  1. **Suggest a PR description**
+     - Summarize:
+       - What was tested
+       - Why the test was added
+       - What regression or risk it prevents
+     - Keep it concise and review-friendly.
+
+  2. Inform the user that cleanup is required after merge.
+  3. Specify which local and remote branches can be deleted.
+
+Example:
+- "Suggested PR description:
+  - Adds regression tests for whitespace handling in `parseTypingLine`
+  - Prevents incorrect accuracy calculation when extra spaces are typed
+
+  After merging `test/parseTypingLine-whitespace`, you can safely delete:
+  - local branch: `test/parseTypingLine-whitespace`
+  - remote branch: `origin/test/parseTypingLine-whitespace`"
+---
+
+### ⚠️ Absolute Rules
+
+- Never skip any step above.
+- Never combine multiple unrelated tests into one branch.
+- If unsure about branch naming, scope, or cleanup timing, ASK first.
