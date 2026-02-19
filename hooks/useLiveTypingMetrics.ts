@@ -8,6 +8,8 @@ export type TypingMetrics = {
   acc: number; // 0 ~ 100
 };
 
+export type MetricSnapshot = { second: number; wpm: number; acc: number };
+
 type Sample = { t: number; len: number };
 
 export function useLiveTypingMetrics(
@@ -18,15 +20,19 @@ export function useLiveTypingMetrics(
   const startedAtRef = useRef<number | null>(null);
   const [tick, setTick] = useState(0);
   const samplesRef = useRef<Sample[]>([]);
+  const snapshotsRef = useRef<MetricSnapshot[]>([]);
+  const lastSnapshotSecRef = useRef(-1);
   const windowMs = 4_000;
 
   // "확정 입력 길이" (조합중 마지막 1글자 제외)
   const stableLen = Math.max(0, input.length - (isComposing ? 1 : 0));
 
-  // 첫 입력 시 시작 시간 고정
+  // 첫 입력 시 시작 시간 고정 + 0초 스냅샷 삽입
   useEffect(() => {
     if (!startedAtRef.current && stableLen > 0) {
       startedAtRef.current = Date.now();
+      snapshotsRef.current.push({ second: 0, wpm: 0, acc: 100 });
+      lastSnapshotSecRef.current = 0;
     }
   }, [stableLen]);
 
@@ -88,36 +94,45 @@ export function useLiveTypingMetrics(
 
     while (samples.length && samples[0].t < from) samples.shift();
 
+    let finalWpm: number;
+    let finalCpm: number;
+
     if (samples.length >= 2) {
       const first = samples[0];
       const last = samples[samples.length - 1];
 
       if (now - last.t >= windowMs) {
-        return { elapsedMs, cpm: 0, wpm: 0, acc };
+        finalWpm = 0;
+        finalCpm = 0;
+      } else {
+        const dtMin = Math.max(0.001, (now - first.t) / 60000);
+        const dLen = Math.max(0, last.len - first.len);
+        finalCpm = Math.round(dLen / dtMin);
+        finalWpm = Math.round((dLen / 5) / dtMin);
       }
-
-      const dtMin = Math.max(0.001, (now - first.t) / 60000);
-      const dLen = Math.max(0, last.len - first.len);
-
-      const cpm = Math.round(dLen / dtMin);
-      const wpm = Math.round((dLen / 5) / dtMin);
-
-      return { elapsedMs, cpm, wpm, acc };
+    } else {
+      finalCpm = isFinite(baseCpm) ? baseCpm : 0;
+      finalWpm = isFinite(baseWpm) ? baseWpm : 0;
     }
 
-    return {
-      elapsedMs,
-      cpm: isFinite(baseCpm) ? baseCpm : 0,
-      wpm: isFinite(baseWpm) ? baseWpm : 0,
-      acc,
-    };
+    // 1초 단위 스냅샷 수집 (WPM 상한 150 클램핑 — 초반 노이즈 방지)
+    const currentSec = Math.floor(elapsedMs / 1000);
+    if (currentSec > lastSnapshotSecRef.current) {
+      lastSnapshotSecRef.current = currentSec;
+      const clampedWpm = Math.min(finalWpm, 120);
+      snapshotsRef.current.push({ second: currentSec, wpm: clampedWpm, acc });
+    }
+
+    return { elapsedMs, cpm: finalCpm, wpm: finalWpm, acc };
   }, [lineText, input, stableLen, isComposing, tick]);
 
   const resetMetrics = () => {
     startedAtRef.current = null;
     samplesRef.current = [];
+    snapshotsRef.current = [];
+    lastSnapshotSecRef.current = -1;
     setTick(0);
   };
 
-  return { metrics, resetMetrics };
+  return { metrics, snapshots: snapshotsRef.current, resetMetrics };
 }

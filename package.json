@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.16",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.6",
     "motion": "^12.23.26",
     "next": "16.0.7",
     "next-auth": "^4.24.13",

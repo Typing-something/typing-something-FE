@@ -11,6 +11,7 @@ import { SettingsSidebar } from "./SettingsSidebar";
 import { LyricsListSidebar } from "./LyricsListSidebar";
 import { Song } from "@/types/song";
 import { parseTypingLine } from "@/utils/parseTypingLine";
+import type { MetricSnapshot } from "@/hooks/useLiveTypingMetrics";
 import { useSession } from "next-auth/react";
 import { usePostTextResult } from "@/query/usePostTextResult";
 import { usePostFavorite } from "@/query/usePostFavorite";
@@ -21,7 +22,7 @@ type Props = {
   songs: Song[];
 }
 
-type Result = { wpm: number; cpm: number; acc: number };
+type Result = { wpm: number; cpm: number; acc: number; snapshots: MetricSnapshot[] };
 
 export function SongTypeBoard({ songs }: Props) {
   const { data: session, status } = useSession(); // authenticated / unauthenticated / loading
@@ -79,7 +80,7 @@ export function SongTypeBoard({ songs }: Props) {
   const progress = Math.min(Math.round((input.length / text.length) * 100), 100);
   const cursorIndex = Math.min(input.length, text.length);
   
-  const { metrics, resetMetrics } = useLiveTypingMetrics(text, input, isComposing);
+  const { metrics, snapshots, resetMetrics } = useLiveTypingMetrics(text, input, isComposing);
   
   const wpm = metrics.wpm;
   const cpm = metrics.cpm;
@@ -243,7 +244,7 @@ export function SongTypeBoard({ songs }: Props) {
   
       e.preventDefault();
 
-      const final = { wpm: metrics.wpm, cpm: metrics.cpm, acc: metrics.acc};
+      const final = { wpm: metrics.wpm, cpm: metrics.cpm, acc: metrics.acc, snapshots: [...snapshots] };
 
       // 1) 로그인 여부 상관없이 모달은 띄움
       setResult(final);
