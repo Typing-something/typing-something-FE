@@ -3,7 +3,9 @@
 import { IconButton } from "../atoms/IconButton";
 import { useSession } from "next-auth/react";
 import { ProfileAvatar } from "@/components/atoms/ProfileAvatar";
-type Result = { wpm: number; cpm: number; acc: number };
+import { TypingResultChart } from "./TypingResultChart";
+import type { MetricSnapshot } from "@/hooks/useLiveTypingMetrics";
+type Result = { wpm: number; cpm: number; acc: number; snapshots: MetricSnapshot[] };
 type SongMeta = {
   songId: number;
   imageUrl: string;
@@ -38,7 +40,7 @@ export function ResultModal({
       onMouseDown={onClose}
     >
       <div
-        className="relative w-full max-w-sm overflow-hidden bg-white shadow-2xl"
+        className="relative w-full max-w-lg overflow-hidden bg-white shadow-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* close */}
@@ -53,7 +55,7 @@ export function ResultModal({
         {/* header */}
         <div className="border-b border-neutral-200 px-6 pb-5 pt-10 text-center">
           <div className="text-xl font-extrabold tracking-tight text-neutral-900">
-            LyricType
+            TypeSomething
           </div>
           
         </div>
@@ -64,6 +66,13 @@ export function ResultModal({
           <StatCell label="CPM" value={result.cpm} />
           <StatCell label="ACC" value={`${result.acc}%`} />
         </div>
+        {/* chart */}
+        <div className="border-b border-neutral-200 px-4 py-3">
+          <div className="mx-auto max-w-md">
+            <TypingResultChart snapshots={result.snapshots} />
+          </div>
+        </div>
+
         {/* text meta (UI only) */}
         <div className="border-b border-neutral-200 px-6 py-5">
           <div className="flex gap-4">
@@ -72,7 +81,7 @@ export function ResultModal({
                   src={song.imageUrl}
                   alt=""
                   className="h-full w-full object-cover"
-                />           
+                />
             </div>
             <div>
               <div className="text-base font-semibold text-neutral-900">
@@ -84,7 +93,7 @@ export function ResultModal({
               </div>
             </div>
           </div>
-        
+
           <div className="mt-3 inline-flex items-center gap-1 rounded border border-neutral-300 px-2 py-0.5 text-xs font-medium text-neutral-600">
             📜 KPOP
           </div>
