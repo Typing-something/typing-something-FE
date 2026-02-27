@@ -12,11 +12,22 @@ TypeSomething은 음악 가사를 타이핑하는 방식으로
 사용자는 가사를 따라 입력하며 자신의 타이핑 속도와 정확도를
 확인할 수 있습니다.
 
-## 스크린샷
+## 시연 영상
 
-| 화면1 | 화면2 |
-|-------|-------|
-| ![screenshot1]() | ![screenshot2]() |
+### 타이핑
+https://github.com/user-attachments/assets/da4b4f79-0025-4caf-9bdd-61222b8b5646
+
+### 곡 무한 페치
+https://github.com/user-attachments/assets/7e60fc2f-48f1-4b88-96df-8175fa7bf3e5
+
+### 마이페이지
+https://github.com/user-attachments/assets/d71b3464-542d-440c-8d93-e6eaac27d863
+
+### 리더보드
+https://github.com/user-attachments/assets/787d274c-291e-482c-8e29-096309feeb35
+
+<!-- ### 어드민
+> 추후 추가 예정 -->
 
 ## 주요 기능
 
@@ -30,6 +41,7 @@ TypeSomething은 음악 가사를 타이핑하는 방식으로
   - 입력 중 타이핑 속도(WPM, CPM)와 정확도를 실시간으로 확인
   - 타이핑 종료 후에는 결과를 모달로 분리해
     입력 과정과 결과 확인 경험을 명확히 구분
+  - 결과 모달에서 WPM/ACC 추이를 시계열 차트로 시각화 (ECharts)
 
 - 결과 기록 처리
   - 로그인 여부에 따라 결과 저장 책임을 분리
@@ -48,16 +60,44 @@ TypeSomething은 음악 가사를 타이핑하는 방식으로
 
 ## 기술 스택
 
-| 분류 | 기술 |
-|------|------|
-| Frontend | Next.js, React, Zustand, TanStack Query, Motion, Tailwind CSS |
-| Backend | - |
-| Database | - |
-| Infra | Vercel |
+### Frontend
+- **Framework**: Next.js 16 (App Router), React 19
+- **State Management**: Zustand, TanStack Query
+- **Styling**: Tailwind CSS 4
+- **Chart**: ECharts (Canvas 렌더링)
+- **Animation**: Motion
+- **Authentication**: NextAuth.js (Google OAuth 2.0)
+- **Deployment**: Vercel
+
+
+## 프로젝트 구조
+
+Atomic Design 패턴을 적용하여 컴포넌트의 재사용성과 관심사 분리를 고려했습니다.
+
+```
+├── app/                    # Next.js App Router (페이지 + API Routes)
+│   ├── api/                # API Route Handlers (프록시)
+│   ├── leaderboard/        # 리더보드 페이지
+│   ├── login/              # 로그인 페이지
+│   ├── my/                 # 마이페이지
+│   └── page.tsx            # 메인 타이핑 페이지
+│
+├── components/
+│   ├── atoms/              # 최소 단위 UI (Avatar, Button, Logo 등)
+│   ├── molecules/          # 조합 UI (ResultModal, TypingStage, TypingResultChart 등)
+│   └── organisms/          # 페이지 섹션 (SongTypeBoard, LeaderboardList, SettingsSidebar 등)
+│
+├── hooks/                  # 커스텀 훅 (useLiveTypingMetrics, usePrefetchSongs 등)
+├── lib/api/                # API 호출 함수
+├── query/                  # React Query 훅
+├── stores/                 # Zustand 상태 관리
+├── types/                  # 타입 정의
+└── utils/                  # 유틸리티 함수 (parseTypingLine 등)
+```
 
 ## 아키텍처
 
-(다이어그램 또는 설명)
+![Architecture](https://github.com/user-attachments/assets/51676c1f-05a5-401e-912b-e928b790970e)
 
 ## 실행 방법
 
@@ -84,5 +124,4 @@ npm run dev
 
 ## 관련 링크
 
-- [Backend Repository]()
-- [Figma]()
+- [Backend Repository](https://github.com/Typing-something/Flask_Api_Server)
