@@ -14,20 +14,16 @@ TypeSomething은 음악 가사를 타이핑하는 방식으로
 
 ## 시연 영상
 
-### 타이핑
-https://github.com/user-attachments/assets/da4b4f79-0025-4caf-9bdd-61222b8b5646
-
-### 곡 무한 페치
-https://github.com/user-attachments/assets/7e60fc2f-48f1-4b88-96df-8175fa7bf3e5
-
-### 마이페이지
-https://github.com/user-attachments/assets/d71b3464-542d-440c-8d93-e6eaac27d863
-
-### 리더보드
-https://github.com/user-attachments/assets/787d274c-291e-482c-8e29-096309feeb35
-
-<!-- ### 어드민
-> 추후 추가 예정 -->
+<table>
+  <tr>
+    <td align="center" width="50%"><b>타이핑</b><br><video src="https://github.com/user-attachments/assets/da4b4f79-0025-4caf-9bdd-61222b8b5646" /></td>
+    <td align="center" width="50%"><b>곡 무한 페치</b><br><video src="https://github.com/user-attachments/assets/7e60fc2f-48f1-4b88-96df-8175fa7bf3e5" /></td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><b>마이페이지</b><br><video src="https://github.com/user-attachments/assets/d71b3464-542d-440c-8d93-e6eaac27d863" /></td>
+    <td align="center" width="50%"><b>리더보드</b><br><video src="https://github.com/user-attachments/assets/787d274c-291e-482c-8e29-096309feeb35" /></td>
+  </tr>
+</table>
 
 ## 주요 기능
 
