@@ -2,7 +2,7 @@
 
 > 노래 가사 타이핑 웹
 
-[배포 링크](https://typesomething.vercel.app)
+[배포 링크](https://typesomething.vercel.app) · [Storybook](https://main--69a53f67b8b079719aa637ab.chromatic.com)
 
 ## 프로젝트 소개
 
@@ -63,6 +63,8 @@ TypeSomething은 음악 가사를 타이핑하는 방식으로
 - **Chart**: ECharts (Canvas 렌더링)
 - **Animation**: Motion
 - **Authentication**: NextAuth.js (Google OAuth 2.0)
+- **Testing**: Jest, React Testing Library
+- **UI Documentation**: Storybook, Chromatic
 - **Deployment**: Vercel
 
 
