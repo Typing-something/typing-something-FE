@@ -4,7 +4,7 @@ import { ResultModal } from './ResultModal'
 
 const mockSession = {
   expires: '2099-01-01',
-  user: { name: '하치와레', email: 'hachi@example.com', image: '/hachiware.webp' },
+  user: { name: '하치와레', email: 'hachi@example.com', image: '/hachiware.webp', user_id: 1, is_admin: false },
 }
 
 const mockResult = {
