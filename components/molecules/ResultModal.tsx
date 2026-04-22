@@ -3,7 +3,12 @@
 import { IconButton } from "../atoms/IconButton";
 import { useSession } from "next-auth/react";
 import { ProfileAvatar } from "@/components/atoms/ProfileAvatar";
-import { TypingResultChart } from "./TypingResultChart";
+import dynamic from "next/dynamic";
+
+const TypingResultChart = dynamic(
+  () => import("./TypingResultChart").then((m) => m.TypingResultChart),
+  { ssr: false, loading: () => <div className="h-[140px]" /> }
+);
 import type { MetricSnapshot } from "@/hooks/useLiveTypingMetrics";
 type Result = { wpm: number; cpm: number; acc: number; snapshots: MetricSnapshot[] };
 type SongMeta = {
