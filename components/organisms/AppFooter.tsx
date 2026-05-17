@@ -1,21 +1,29 @@
-// components/organisms/AppFooter.tsx
 import Link from "next/link";
 
-export function AppFooter(){
-    return(
-        <footer className="border-t border-neutral-800 bg-neutral-950 text-neutral-500">
-            <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4 text-xs">
-                <span>© 2025 Typing Something</span>
-                <div>
-                    <Link 
-                    href="https://github.com/..."
-                    className="hover:text-neutral-200 transition-colors underline-offset-4 hover:underline"                    
-                    >
-                        GitHub
-                    </Link>
-                </div>
-            </div>
+type AppFooterProps = {
+  fixed?: boolean;
+};
 
-        </footer>
-    )
+export function AppFooter({ fixed = false }: AppFooterProps) {
+  return (
+    <footer
+      className={`${
+        fixed ? "fixed inset-x-0 bottom-0 z-50" : ""
+      } bg-neutral-100 text-neutral-500`}
+    >
+      <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4 text-xs">
+        <span>© 2026 Typing Something</span>
+        <div>
+          <Link
+            href="https://github.com/Typing-something"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline-offset-4 transition-colors hover:text-neutral-900 hover:underline"
+          >
+            GitHub
+          </Link>
+        </div>
+      </div>
+    </footer>
+  );
 }

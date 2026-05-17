@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppHeader } from "@/components/organisms/AppHeader";
-import { AppFooter } from "@/components/organisms/AppFooter";
+import { FooterController } from "@/components/organisms/FooterController";
 import { orbit, inter, orbitron, grandiflora } from "./font";
 import Providers from "./providers";
 
@@ -70,7 +70,7 @@ export default function RootLayout({
           <main className="min-h-screen">
             {children}
           </main>
-          {/* <AppFooter /> */}
+          <FooterController />
        </Providers>
       </body>
     </html>
