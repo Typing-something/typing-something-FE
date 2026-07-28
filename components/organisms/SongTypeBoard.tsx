@@ -147,23 +147,39 @@ export function SongTypeBoard({ songs }: Props) {
     if (status !== "authenticated") return;
     if (!userId) return;
     if (postFavoriteMutation.isPending) return;
-  
-    // 현재 값 저장(rollback용)
+
+    const useOptimistic = localStorage.getItem('useOptimistic') !== 'false';
     const prev = localSongs.find((s) => s.songId === textId)?.isFavorite ?? false;
-  
-    // optimistic: 먼저 반전
-    setLocalSongs((prevSongs) =>
-      prevSongs.map((s) =>
-        s.songId === textId ? { ...s, isFavorite: !s.isFavorite } : s
-      )
-    );
-  
+
+    if (useOptimistic) {
+      // optimistic: 먼저 반전
+      setLocalSongs((prevSongs) =>
+        prevSongs.map((s) =>
+          s.songId === textId ? { ...s, isFavorite: !s.isFavorite } : s
+        )
+      );
+      console.log("[optimistic=true] UI 즉시 변경됨");
+    }
+
     try {
-      await postFavoriteMutation.mutateAsync({
+      const startServer = performance.now();
+      const response = await postFavoriteMutation.mutateAsync({
         user_id: userId,
         text_id: textId,
       });
-      // 성공이면 noop (이미 UI 반영됨)
+      const serverTime = performance.now() - startServer;
+      console.log(`[server] 왕복 시간: ${serverTime.toFixed(2)}ms`);
+
+      if (!useOptimistic) {
+        // 낙관적 없음: 서버 응답에서 받은 is_favorite 값으로 업데이트
+        const newFavoriteState = response.is_favorite ?? !prev;
+        setLocalSongs((prevSongs) =>
+          prevSongs.map((s) =>
+            s.songId === textId ? { ...s, isFavorite: newFavoriteState } : s
+          )
+        );
+        console.log(`[optimistic=false] ${serverTime.toFixed(2)}ms 후 UI 변경됨`);
+      }
     } catch {
       // 실패면 rollback
       setLocalSongs((prevSongs) =>
@@ -171,6 +187,7 @@ export function SongTypeBoard({ songs }: Props) {
           s.songId === textId ? { ...s, isFavorite: prev } : s
         )
       );
+      console.log("[error] 좋아요 토글 실패");
     }
   };
     // useEffect(() => {
